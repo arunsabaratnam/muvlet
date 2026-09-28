@@ -19,6 +19,13 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 - Offer personalized AI responses for training, nutrition, and recovery questions.
 - Provide an intuitive, accessible interface that encourages users instead of intimidating them.
 
+## Benefits to Customers
+
+- Build confidence in the gym through clear workout guidance and form education.
+- Keep workouts, nutrition, and personal progress in one place.
+- Receive goal-oriented support that adapts to the user's experience and needs.
+- Start with an approachable, motivating experience rather than an overwhelming fitness app.
+
 ## Project Outline
 
 ### Planned user experience
@@ -29,7 +36,7 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 4. **Nutrition** — Users can journal meals, review calorie and macronutrient information, account for dietary restrictions, and receive meal suggestions.
 5. **Progress** — Users can review workout and weight history, see improvements over time, and earn progress points.
 
-### Core features
+### Key things to accomplish
 
 - User profiles and onboarding
 - AI character helpers
@@ -53,6 +60,14 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 4. Gather stakeholder feedback.
 5. Iterate based on feedback.
 
+## Criteria for Success
+
+- Users can reliably create an account, sign in, and access their information.
+- Users can log workouts and nutrition, then review their progress over time.
+- AI assistance gives helpful, personalized answers within its supported scope.
+- The interface is clean, accessible, and encouraging for new gym users.
+- User information is protected appropriately.
+
 ## Anticipated Risks
 
 | Risk | Why it matters | Initial mitigation |
@@ -61,9 +76,12 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 | Backend scaling | More users increase load on services and data storage. | Design APIs and infrastructure to scale gradually; monitor performance. |
 | App performance | Slow or unreliable experiences discourage users. | Test on supported devices and keep early-release features focused. |
 | Form analysis | Reliable feedback requires robust computer-vision implementation. | Limit analysis to supported exercises and indicate when a recording cannot be assessed reliably. |
-| Privacy and authentication | Fitness data such as age, weight, and activity must remain private. | Use secure authentication, least-privilege access, and protect user data in transit and at rest. |
-| Nutrition guidance | Advice can be mistaken for medical advice or promote harmful behaviour. | Provide general educational guidance, avoid medical claims, and discourage extreme diets or restrictions. |
-| Inclusivity | Users have different abilities and fitness levels. | Design adaptable workouts and clear, accessible guidance. |
+
+## Legal and Social Issues
+
+- **Privacy and authentication:** Protect personal fitness data and ensure users can access only their own information.
+- **Nutrition guidance:** Provide general educational information, not medical advice, and avoid promoting extreme diets or unhealthy restrictions.
+- **Inclusivity:** Support people with different fitness levels and abilities through adaptable workouts and accessible guidance.
 
 ## Documentation
 
