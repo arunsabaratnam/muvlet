@@ -6,11 +6,10 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 
 | Student | Student ID |
 | --- | --- |
-| Arun Sabaratnam | To be added |
+| Arun Sabaratnam | 300297854|
 | Seif Al Qutob | 300321304 |
 | Mena Girgis | To be added |
 
-> Replace the two `To be added` entries with the team members' verified student IDs before submitting or publishing the project documentation.
 
 ## Main Objectives
 
