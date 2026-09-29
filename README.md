@@ -46,20 +46,6 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 - Nutrition support
 - A simple, accessible interface
 
-### Anticipated architecture
-
-- **Mobile application:** React Native for iOS and Android.
-- **Backend services:** Python with FastAPI.
-- **Future capability:** Computer-vision services for supported form-analysis workflows.
-
-### First-release plan
-
-1. Agree on the core feature set.
-2. Design the user interface around those features.
-3. Build a mock frontend.
-4. Gather stakeholder feedback.
-5. Iterate based on feedback.
-
 ## Criteria for Success
 
 - Users can reliably create an account, sign in, and access their information.
