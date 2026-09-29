@@ -30,11 +30,11 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 
 ### Planned user experience
 
-1. **Onboarding and account access** — Users create an account, describe their goals, and provide relevant profile information.
-2. **Home dashboard** — A motivating, gamified home screen surfaces the user's current workout, nutrition, and progress.
-3. **Workouts** — Users can browse workout plans and templates, start a workout, use a rest timer, view form demonstrations, and log sets, repetitions, and weights.
-4. **Nutrition** — Users can journal meals, review calorie and macronutrient information, account for dietary restrictions, and receive meal suggestions.
-5. **Progress** — Users can review workout and weight history, see improvements over time, and earn progress points.
+1. **Onboarding and account access**: Users create an account, describe their goals, and provide relevant profile information.
+2. **Home dashboard**: A motivating, gamified home screen surfaces the user's current workout, nutrition, and progress.
+3. **Workouts**: Users can browse workout plans and templates, start a workout, use a rest timer, view form demonstrations, and log sets, repetitions, and weights.
+4. **Nutrition**: Users can journal meals, review calorie and macronutrient information, account for dietary restrictions, and receive meal suggestions.
+5. **Progress**: Users can review workout and weight history, see improvements over time, and earn progress points.
 
 ### Key things to accomplish
 
