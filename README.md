@@ -8,7 +8,7 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 | --- | --- |
 | Arun Sabaratnam | 300297854|
 | Seif Al Qutob | 300321304 |
-| Mena Girgis | To be added |
+| Mena Girgis | 300293273 |
 
 
 ## Main Objectives
