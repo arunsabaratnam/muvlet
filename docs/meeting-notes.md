@@ -86,3 +86,69 @@ Source: [Google Drive Meeting Notes](https://docs.google.com/document/d/144tr1v2
 ### Next step
 
 - Discuss the architecture at the next meeting.
+
+
+## Wednesday, September 30, 2026
+- Decide on the architecture of the app
+- Mobile framework
+  - Discussed Flutter
+    - Can't use because we want to support android as well and there's no ecosystem for things like cameras, rive.
+  - Native (Swift + Kotlin)
+    - Good camera performance, and access to new OS feature
+    - Would have to build out the app twice with only a team of 3
+  - **React Native + Expo**
+    - Huge library + support base, works well for iOS and android with one TypeScript codebase. Easier development with expo with native features like with notifications, permission and device testing. 
+    - Doesn't support animation well which is a core feature of the app, but can be solved by with other libraries 
+  - Web app
+    - Not the goal of the app
+- Backend
+  - **PostgresSQL**
+    - Can build on Supabase which has things like login, file storage and per-user acess rules. 
+    - Row-level security to keep the database secure
+    - Flexible columns
+    - Rows are easier to query
+    - Open source
+    - Doesn't include offline sync
+    - Changing structure can be hard
+      - Solved by SQLAlchemy and Alembic
+  - NoSQL
+    - Harder to query groupped data
+    - Data is copied in various locations
+  - MySQL
+    - No database privacy
+    - No supabase
+    - Weaker for lossely shaped data
+  - Custom Server
+    - Can't build with 3 people 
+  - Firebase
+    - Would be harder to leave as we want to scale
+    - Wouldn't be able to query specific things better
+- AI Coaches
+  - Open source model
+    - Don't know if its possible
+    - Can't guarantee sucess 
+  - Make our own LLM
+    - Would have to verify accuracy 
+    - Don't know if we have the data to train the model
+  - Claude API 
+    - Costs money
+    - Use a lightweight model 
+- Form Checking
+  - AI checking
+    - Costs money
+    - Slow
+  - On-device pose tracking + rules per exisrcise
+    - Free, works real time
+    - Every peiece of feedback traces back to a measurement
+    - If joints aren't visible it cannot work
+  - Train our own model
+    - Needs lots of training data that we don't have 
+- Meal Photo Estimates
+  - AI vision identifies the foods and the portions 
+    - Costs money
+    - Database need store the macros of the food
+- Code Architecture
+  - Modern Monolith
+    - Easier to scale over time
+    - Each feature is owned by a person
+  
