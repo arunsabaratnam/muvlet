@@ -152,3 +152,19 @@ Source: [Google Drive Meeting Notes](https://docs.google.com/document/d/144tr1v2
     - Easier to scale over time
     - Each feature is owned by a person
   
+## Saturday, October 10, 2026 (on chat)
+- Dicussed the division of tasks:
+  - Mena primarily focusing on the nutrtion camera
+    - Has to see the food
+    - Store data
+    - Check how many calories
+  - Seif primarily focuisng on the form tracking camera
+    - Has to view the users form
+    - Evaluate it 
+  - Arun acting as an all around helper
+    - Will aid Seif and Mena whenever they need help
+    - Will work on the full stack of the application 
+
+### Next steps
+  - Will meet up tomorrow to see progress and ensure everythign is goign in the same direction
+  
