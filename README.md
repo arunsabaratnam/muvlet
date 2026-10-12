@@ -69,6 +69,42 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 - **Nutrition guidance:** Provide general educational information, not medical advice, and avoid promoting extreme diets or unhealthy restrictions.
 - **Inclusivity:** Support people with different fitness levels and abilities through adaptable workouts and accessible guidance.
 
+## Run the app on your phone
+
+You need [Node.js 22](https://nodejs.org/) on your computer and the **Expo Go** app on your phone ([App Store](https://apps.apple.com/app/expo-go/id982107779) / [Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent)). Keep Expo Go updated: the app uses Expo SDK 57, and Expo Go only runs the latest SDK.
+
+```sh
+npm install
+npx expo start
+```
+
+Scan the QR code in the terminal. On iPhone, use the Camera app; on Android, use the scanner in Expo Go. Your phone and computer must be on the same Wi-Fi. If that doesn't work (for example on campus Wi-Fi), run `npx expo start --tunnel` instead.
+
+Other scripts:
+
+| Command | What it does |
+| --- | --- |
+| `npm test` | Run the tests (Jest) |
+| `npm run lint` | Lint with ESLint (`expo lint`) |
+| `npm run typecheck` | Type-check with TypeScript |
+
+## Project structure
+
+- `src/app/` holds routes only (Expo Router). Each file is a one-line re-export of a feature screen.
+- `src/features/<area>/` holds the code for each feature (`today`, `workouts`, `form-check`, `nutrition`, `progress`).
+- `src/components/ui/` holds shared UI (`Button`, `Card`). Colours, fonts, spacing and radii live in `src/constants/theme.ts`.
+
+## Contributing
+
+1. Open an issue for the work (use the bug or feature template).
+2. Create a branch and open a pull request. Never push to `main`.
+3. The **PR title** must follow [Conventional Commits](https://www.conventionalcommits.org/): `type: summary`, where `type` is `feat`, `fix`, `chore`, `docs`, `refactor` or `test`. Example: `feat: add rest timer`.
+4. The **PR description** must link the issue with `Closes #N`. `docs:` PRs don't need an issue.
+5. Two checks must pass: `ci` (typecheck, lint, tests) and `pr-title`. `ci` is skipped for PRs that only change `docs/`. No approvals are required.
+6. PRs are **squash merged only**, so the PR title becomes the single commit on `main`.
+
+Meeting notes go in `docs/meetings/YYYY-MM-DD.md`, one file per meeting. Copy `docs/meetings/TEMPLATE.md` to start one.
+
 ## Documentation
 
-- [Meeting notes](docs/meeting-notes.md) — team discussions and decisions from September 21, 23, and 28, 2026.
+- [Meeting notes](docs/meetings/): team discussions and decisions, one file per meeting.
