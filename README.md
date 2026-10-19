@@ -71,14 +71,34 @@ Muvlet is a fitness companion that helps beginners feel confident in the gym. It
 
 ## Run the app on your phone
 
-You need [Node.js 22](https://nodejs.org/) on your computer and the **Expo Go** app on your phone ([App Store](https://apps.apple.com/app/expo-go/id982107779) / [Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent)). Keep Expo Go updated: the app uses Expo SDK 57, and Expo Go only runs the latest SDK.
+Muvlet runs in its own **development build**, not Expo Go. You need [Node.js 22](https://nodejs.org/) on your computer and the Muvlet development build on your phone.
+
+### Install the development build (once per phone)
+
+- **iPhone:** ask for a registration link, open it on your iPhone and follow the steps. Then install from the build link you're sent.
+- **Android:** open the build link you're sent on your phone and install the app.
+
+Install the new build whenever one is shared (only needed when a library with native code is added).
+
+### Start the app
 
 ```sh
 npm install
 npx expo start
 ```
 
-Scan the QR code in the terminal. On iPhone, use the Camera app; on Android, use the scanner in Expo Go. Your phone and computer must be on the same Wi-Fi. If that doesn't work (for example on campus Wi-Fi), run `npx expo start --tunnel` instead.
+Open the Muvlet app on your phone and scan the QR code in the terminal. Your phone and computer must be on the same Wi-Fi. If that doesn't work (for example on campus Wi-Fi), run `npx expo start --tunnel` instead.
+
+### Making a new build
+
+This needs access to the project's Expo account.
+
+```sh
+npx eas-cli@latest device:create   # makes an iPhone registration link
+npx eas-cli@latest build --profile development --platform all
+```
+
+The first build asks you to log in to Expo and set the app's iOS and Android IDs. Share the install links with the team.
 
 Other scripts:
 
@@ -108,3 +128,4 @@ Meeting notes go in `docs/meetings/YYYY-MM-DD.md`, one file per meeting. Copy `d
 ## Documentation
 
 - [Meeting notes](docs/meetings/): team discussions and decisions, one file per meeting.
+- [Decisions](docs/decisions/): what we decided and why, one file per decision.
