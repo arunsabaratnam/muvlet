@@ -4,17 +4,25 @@
  */
 
 export const colors = {
-  primary: '#16803C',
-  primaryPressed: '#11672F',
+  primary: '#3F6DF3',
+  primaryPressed: '#2E55C9',
   onPrimary: '#FFFFFF',
   accent: '#FFB020',
-  background: '#F7F6F2',
+  background: '#F3F6FA',
   surface: '#FFFFFF',
-  text: '#14161A',
-  textMuted: '#5F6368',
-  border: '#E6E3DC',
-  success: '#1E9E57',
-  danger: '#D93F3F',
+  text: '#1E2A3A',
+  textMuted: '#667487',
+  border: '#E0E6EE',
+  success: '#2FAE6B',
+  danger: '#E5484D',
+} as const;
+
+/** Each coach's colours: `wash` is the splash background, `ink` its text and buttons. */
+export const coachColors = {
+  rex: { wash: '#E4ECFF', ink: '#3F6FF0' },
+  axel: { wash: '#FFE9DA', ink: '#EE6A14' },
+  sage: { wash: '#D8F5EC', ink: '#16A383' },
+  luna: { wash: '#ECE6FF', ink: '#7A5CE6' },
 } as const;
 
 /**
@@ -27,6 +35,8 @@ export const fonts = {
   body: 'Figtree_400Regular',
   bodyMedium: 'Figtree_500Medium',
   bodySemiBold: 'Figtree_600SemiBold',
+  bodyBold: 'Figtree_700Bold',
+  bodyExtraBold: 'Figtree_800ExtraBold',
 } as const;
 
 export const spacing = {
@@ -41,5 +51,6 @@ export const radius = {
   sm: 8,
   md: 14,
   lg: 20,
+  button: 18,
   pill: 999,
 } as const;

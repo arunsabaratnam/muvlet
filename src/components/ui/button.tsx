@@ -18,7 +18,7 @@ export function Button({ title, variant = 'primary', disabled, ...rest }: Button
       style={({ pressed }) => [
         styles.base,
         isPrimary ? styles.primary : styles.secondary,
-        pressed && (isPrimary ? styles.primaryPressed : styles.secondaryPressed),
+        pressed && styles.pressed,
         disabled && styles.disabled,
       ]}
       {...rest}>
@@ -29,34 +29,36 @@ export function Button({ title, variant = 'primary', disabled, ...rest }: Button
   );
 }
 
+// Chunky "3D" button from the design: a darker bottom edge that presses down.
 const styles = StyleSheet.create({
   base: {
-    minHeight: 48,
+    minHeight: 56,
     paddingHorizontal: spacing.lg,
-    borderRadius: radius.pill,
+    borderRadius: radius.button,
+    borderBottomWidth: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  pressed: {
+    borderBottomWidth: 1,
+    transform: [{ translateY: 3 }],
+  },
   primary: {
     backgroundColor: colors.primary,
-  },
-  primaryPressed: {
-    backgroundColor: colors.primaryPressed,
+    borderBottomColor: colors.primaryPressed,
   },
   secondary: {
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
+    borderWidth: 2,
+    borderBottomWidth: 4,
     borderColor: colors.border,
-  },
-  secondaryPressed: {
-    backgroundColor: colors.background,
   },
   disabled: {
     opacity: 0.5,
   },
   label: {
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 16,
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 17,
   },
   primaryLabel: {
     color: colors.onPrimary,

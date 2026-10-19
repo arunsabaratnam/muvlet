@@ -32,7 +32,7 @@ export default function TabLayout() {
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
       }}>
       <Tabs.Screen
-        name="index"
+        name="today"
         options={{ title: 'Today', tabBarIcon: tabIcon('today-outline', 'today') }}
       />
       <Tabs.Screen
