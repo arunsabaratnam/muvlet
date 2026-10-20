@@ -5,9 +5,11 @@ import { colors, fonts, radius, spacing } from '@/constants/theme';
 type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   title: string;
   variant?: 'primary' | 'secondary';
+  /** Fill and bottom edge for a primary button, e.g. a coach's colours. */
+  color?: { ink: string; shade: string };
 };
 
-export function Button({ title, variant = 'primary', disabled, ...rest }: ButtonProps) {
+export function Button({ title, variant = 'primary', color, disabled, ...rest }: ButtonProps) {
   const isPrimary = variant === 'primary';
 
   return (
@@ -18,11 +20,17 @@ export function Button({ title, variant = 'primary', disabled, ...rest }: Button
       style={({ pressed }) => [
         styles.base,
         isPrimary ? styles.primary : styles.secondary,
+        isPrimary && color && { backgroundColor: color.ink, borderBottomColor: color.shade },
         pressed && styles.pressed,
         disabled && styles.disabled,
       ]}
       {...rest}>
-      <Text style={[styles.label, isPrimary ? styles.primaryLabel : styles.secondaryLabel]}>
+      <Text
+        style={[
+          styles.label,
+          isPrimary ? styles.primaryLabel : styles.secondaryLabel,
+          disabled && styles.disabledLabel,
+        ]}>
         {title}
       </Text>
     </Pressable>
@@ -54,7 +62,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   disabled: {
-    opacity: 0.5,
+    backgroundColor: colors.disabled,
+    borderBottomColor: colors.disabledEdge,
   },
   label: {
     fontFamily: fonts.bodyExtraBold,
@@ -65,5 +74,8 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: {
     color: colors.text,
+  },
+  disabledLabel: {
+    color: colors.textFaint,
   },
 });

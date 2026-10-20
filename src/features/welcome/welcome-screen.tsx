@@ -231,7 +231,7 @@ export default function WelcomeScreen() {
       <Animated.View
         pointerEvents={settled ? 'auto' : 'none'}
         style={[styles.buttons, { bottom: 34 + insets.bottom }, buttonsStyle]}>
-        <Button title="Get started" onPress={() => router.replace('/today')} />
+        <Button title="Get started" onPress={() => router.replace('/onboarding/intro')} />
         <Button
           title="I already have an account"
           variant="secondary"
