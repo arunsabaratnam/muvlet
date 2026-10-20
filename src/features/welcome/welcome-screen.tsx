@@ -20,8 +20,9 @@ import { Coach, type CoachHandle, type CoachName } from './coach';
 /*
  * Splash and welcome are one screen (design spec 4.1). On open, a ~1.5 s
  * "colour relay" plays: each coach's colour wipes out from them in turn while they
- * greet. Then the crew and wordmark glide up and the buttons arrive. Tapping during
- * the relay skips to the end; with reduced motion it starts at the end.
+ * greet. Then the crew and wordmark glide up and the buttons arrive. The relay waits
+ * on the plain wash until all four coaches are ready, so none of them pops in late.
+ * Tapping during the relay skips to the end; with reduced motion it starts at the end.
  * Positions and timings are taken from the mockup's splashPlay().
  */
 
@@ -31,6 +32,8 @@ const RELAY_STEP_MS = 300;
 const SETTLE_MS = 1500;
 const GREET_AFTER_SETTLE_MS = 1000;
 const IDLE_GREET_EVERY_MS = 4200;
+// If a coach never loads, start anyway so the screen can't get stuck.
+const CREW_LOAD_LIMIT_MS = 3000;
 
 const ease = Easing.bezier(0.22, 1, 0.36, 1);
 const wipeEase = Easing.bezier(0.65, 0, 0.35, 1);
@@ -50,6 +53,9 @@ export default function WelcomeScreen() {
   const [settled, setSettled] = useState(reduceMotion);
   const [wipes, setWipes] = useState(0);
   const [ink, setInk] = useState<string>(reduceMotion ? colors.primary : coachColors.rex.ink);
+  const [readyCoaches, setReadyCoaches] = useState<CoachName[]>([]);
+  const [waitedTooLong, setWaitedTooLong] = useState(false);
+  const crewReady = readyCoaches.length === CREW.length || waitedTooLong;
 
   const start = reduceMotion ? 1 : 0;
   const crewIn = useSharedValue(start);
@@ -82,9 +88,14 @@ export default function WelcomeScreen() {
     animateTo(buttonsIn, 700, 650);
   }
 
-  // The relay.
   useEffect(() => {
-    if (reduceMotion) return;
+    const timer = setTimeout(() => setWaitedTooLong(true), CREW_LOAD_LIMIT_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // The relay, once the crew is ready.
+  useEffect(() => {
+    if (reduceMotion || !crewReady) return;
     const timers = relayTimers.current;
     const at = (ms: number, run: () => void) => timers.push(setTimeout(run, ms));
     animateTo(crewIn, 380);
@@ -98,9 +109,9 @@ export default function WelcomeScreen() {
     });
     at(SETTLE_MS, settle);
     return () => timers.forEach(clearTimeout);
-    // Runs once on open; settle() only touches refs, shared values and state setters.
+    // Runs once the crew is ready; settle() only touches refs, shared values and state setters.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [crewReady]);
 
   // Once settled the crew says hi, then a random coach waves now and then.
   useEffect(() => {
@@ -134,7 +145,7 @@ export default function WelcomeScreen() {
     transform: [{ translateY: slotHeight * 0.1 * (1 - crewIn.value) }],
   }));
   const floorStyle = useAnimatedStyle(() => ({
-    opacity: 0.1 * crewUp.value,
+    opacity: crewUp.value,
     transform: [{ translateY: -width * 0.3 * crewUp.value }],
   }));
   const wordmarkStyle = useAnimatedStyle(() => ({
@@ -156,7 +167,7 @@ export default function WelcomeScreen() {
   return (
     <Pressable
       style={styles.screen}
-      onPress={settled ? undefined : settle}
+      onPress={crewReady && !settled ? settle : undefined}
       accessible={false}>
       <Animated.View style={[StyleSheet.absoluteFill, styles.wash, washStyle]}>
         {[1, 2, 3]
@@ -173,11 +184,7 @@ export default function WelcomeScreen() {
       </Animated.View>
 
       <Animated.View
-        style={[
-          styles.floor,
-          { top: height * 0.49, height: width * 0.05, borderRadius: width },
-          floorStyle,
-        ]}
+        style={[styles.floor, { top: height * 0.49, height: width * 0.05 }, floorStyle]}
       />
 
       <Animated.View
@@ -194,6 +201,9 @@ export default function WelcomeScreen() {
               ref={(coach) => {
                 coaches.current[i] = coach;
               }}
+              onReady={() =>
+                setReadyCoaches((ready) => (ready.includes(name) ? ready : [...ready, name]))
+              }
               style={StyleSheet.absoluteFill}
             />
           </Animated.View>
@@ -270,11 +280,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: coachColors.rex.wash,
   },
+  // A soft glow under the crew like the mockup: primary at 14% (hex 24), fading to clear.
   floor: {
     position: 'absolute',
     left: '8%',
     right: '8%',
-    backgroundColor: colors.primary,
+    experimental_backgroundImage:
+      `radial-gradient(closest-side, ${colors.primary}24, ${colors.primary}00)`,
   },
   wordmark: {
     position: 'absolute',
