@@ -1,4 +1,4 @@
-import { Fit, RiveView, useRive, useRiveFile } from '@rive-app/react-native';
+import { Fit, RiveView, useRiveFile, useViewModelInstance } from '@rive-app/react-native';
 import { useImperativeHandle, type Ref } from 'react';
 import { View, type StyleProp, type ViewStyle } from 'react-native';
 
@@ -11,7 +11,7 @@ const files = { rex, axel, sage, luna };
 
 export type CoachName = keyof typeof files;
 
-/** `play` fires one of the trigger inputs on the coach's "coach" state machine, e.g. "wave" or "hello". */
+/** `play` fires one of the triggers on the coach's "coach" view model, e.g. "wave" or "hello". */
 export type CoachHandle = { play: (move: string) => void };
 
 type CoachProps = {
@@ -23,13 +23,13 @@ type CoachProps = {
 /** An animated coach from its Rive file. Idles on its own; `ref.play()` triggers a move. */
 export function Coach({ name, ref, style }: CoachProps) {
   const { riveFile } = useRiveFile(files[name]);
-  const { riveRef, setHybridRef } = useRive();
+  const { instance } = useViewModelInstance(riveFile, { async: true });
 
-  useImperativeHandle(ref, () => ({ play: (move) => riveRef.current?.triggerInput(move) }), [
-    riveRef,
+  useImperativeHandle(ref, () => ({ play: (move) => instance?.triggerProperty(move)?.trigger() }), [
+    instance,
   ]);
 
-  if (!riveFile) {
+  if (!riveFile || !instance) {
     return <View style={style} />;
   }
 
@@ -38,7 +38,7 @@ export function Coach({ name, ref, style }: CoachProps) {
       file={riveFile}
       stateMachineName="coach"
       fit={Fit.Contain}
-      hybridRef={setHybridRef}
+      dataBind={instance}
       style={style}
     />
   );
