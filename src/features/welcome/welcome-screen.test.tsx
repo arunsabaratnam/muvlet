@@ -45,7 +45,7 @@ test('the buttons only work once the relay has settled', async () => {
 
   await act(() => jest.advanceTimersByTime(1500));
   await fireEvent.press(screen.getByText('Get started'));
-  expect(router.replace).toHaveBeenCalledWith('/today');
+  expect(router.replace).toHaveBeenCalledWith('/onboarding/intro');
 });
 
 test('tapping during the relay skips to the end', async () => {
@@ -70,5 +70,5 @@ test('the relay waits for the coaches, but not forever', async () => {
   await act(() => jest.advanceTimersByTime(1500));
   await act(() => jest.advanceTimersByTime(1500));
   await fireEvent.press(screen.getByText('Get started'));
-  expect(router.replace).toHaveBeenCalledWith('/today');
+  expect(router.replace).toHaveBeenCalledWith('/onboarding/intro');
 });
