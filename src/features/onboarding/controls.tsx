@@ -145,8 +145,16 @@ export function Chips({
   );
 }
 
-const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+export const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+export const DAY_NAMES = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
 
 /** A row of seven day circles, Sunday first. */
 export function DayPicker({
@@ -234,6 +242,15 @@ function StepButton({
       onPress={onPress}
       style={[styles.stepperButton, { backgroundColor: tint.wash }]}>
       <Text style={[styles.stepperSign, { color: tint.shade }]}>{sign}</Text>
+    </Pressable>
+  );
+}
+
+/** A quiet text button under the main one, e.g. "Not now". */
+export function TextButton({ title, onPress }: { title: string; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={styles.textButton}>
+      <Text style={styles.textButtonLabel}>{title}</Text>
     </Pressable>
   );
 }
@@ -389,5 +406,14 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontVariant: ['tabular-nums'],
     color: colors.text,
+  },
+  textButton: {
+    alignSelf: 'center',
+    padding: 8,
+  },
+  textButtonLabel: {
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 16,
+    color: colors.textMuted,
   },
 });

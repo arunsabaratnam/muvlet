@@ -18,7 +18,7 @@ import { Coach, type CoachHandle, type CoachName } from '@/features/welcome/coac
 
 import { AnswersProvider, useAnswers } from './answers';
 import { BackIcon } from './icons';
-import { GOAL_COACH, goOn, isStep, progress, STEPS, type StepId } from './steps';
+import { GOAL_COACH, goOn, isStep, progress, QUESTIONS, STEPS, type StepId } from './steps';
 
 /*
  * Everything that stays on screen while the steps change (design spec 4.2): the four
@@ -38,8 +38,8 @@ const swing = Easing.bezier(0.65, 0, 0.35, 1);
 const ease = Easing.bezier(0.22, 1, 0.36, 1);
 const overshoot = Easing.bezier(0.34, 1.56, 0.64, 1);
 
-/** Plays a move on the coach who owns the current step, e.g. "nod". */
-const PlayCoach = createContext<(move: string) => void>(() => {});
+/** Plays a move, e.g. "nod", on the coach who owns the current step or on the one named. */
+const PlayCoach = createContext<(move: string, coach?: CoachName) => void>(() => {});
 
 export function usePlayCoach() {
   return use(PlayCoach);
@@ -71,23 +71,24 @@ function Frame({ children }: { children: ReactNode }) {
   // The step we came from decides how the bubble arrives.
   const [{ current, previous }, setSteps] = useState({ current: step, previous: step });
   if (current !== step) setSteps({ current: step, previous: current });
-  const handoff = STEPS[previous].coach !== owner || previous === 'intro';
+  const newCoach = STEPS[previous].coach !== owner;
+  const handoff = newCoach || !QUESTIONS.includes(previous);
 
   useEffect(() => {
     const play = (move: string) => coaches.current[owner]?.play(move);
     const timer =
       step === 'intro'
         ? setTimeout(() => play('wave'), INTRO_WAVE_MS)
-        : handoff && setTimeout(() => play('hello'), HELLO_AFTER_HANDOFF_MS);
+        : newCoach && step !== 'build' && setTimeout(() => play('hello'), HELLO_AFTER_HANDOFF_MS);
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [step, owner, handoff]);
+  }, [step, owner, newCoach]);
 
-  const { question, note } = STEPS[step];
+  const { question, note, bar } = STEPS[step];
 
   return (
-    <PlayCoach value={(move) => coaches.current[owner]?.play(move)}>
+    <PlayCoach value={(move, coach = owner) => coaches.current[coach]?.play(move)}>
       <View style={styles.screen}>
         {children}
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
@@ -107,7 +108,7 @@ function Frame({ children }: { children: ReactNode }) {
           {question ? (
             <Bubble key={step} question={question} note={note} handoff={handoff} />
           ) : null}
-          {question ? <TopBar step={step} /> : null}
+          {bar ? <TopBar step={step} /> : null}
         </View>
       </View>
     </PlayCoach>
@@ -120,6 +121,16 @@ type Spot = { x: number; y: number; width: number; opacity: number };
 function spotFor(step: StepId, index: number, width: number, height: number): Spot {
   const owner = CREW.indexOf(STEPS[step].coach);
   const corner = { x: width * 0.03, y: height * 0.122, width: width * 0.31, opacity: 1 };
+  const row = {
+    x: width * (0.06 + index * 0.2171),
+    y: height * 0.24,
+    width: width * 0.229,
+    opacity: 1,
+  };
+  const below = { ...row, y: height * 0.6, opacity: 0 };
+  if (step === 'build') return row;
+  if (step === 'sign-up') return below;
+  if ((step === 'plan' || step === 'save') && index !== owner) return below;
   if (step === 'intro') {
     return index === 0
       ? { x: width * 0.21, y: height * 0.31, width: width * 0.58, opacity: 1 }

@@ -15,6 +15,7 @@ export type TimeOfDay = 'Morning' | 'Lunch' | 'Evening';
 export type Place = 'Gym' | 'Home' | 'Both';
 export type Units = 'lb' | 'kg';
 export type Sex = 'Male' | 'Female';
+export type Reminders = 'Gentle' | 'Regular' | 'Off';
 
 export type Answers = {
   goal: Goal | null;
@@ -33,6 +34,7 @@ export type Answers = {
   /** True when About you was skipped, so the plan leaves out food targets. */
   skippedAbout: boolean;
   limits: string[];
+  reminders: Reminders;
 };
 
 export const KG_PER_LB = 0.4536;
@@ -60,6 +62,7 @@ export const DEFAULT_ANSWERS: Answers = {
   age: 28,
   skippedAbout: false,
   limits: ['Nothing'],
+  reminders: 'Gentle',
 };
 
 /**

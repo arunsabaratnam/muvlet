@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
 
 import { colors, fonts, radius, spacing } from '@/constants/theme';
@@ -5,11 +6,23 @@ import { colors, fonts, radius, spacing } from '@/constants/theme';
 type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   title: string;
   variant?: 'primary' | 'secondary';
-  /** Fill and bottom edge for a primary button, e.g. a coach's colours. */
+  /**
+   * Fill and bottom edge for a primary button, e.g. a coach's colours.
+   * A secondary button uses `ink` for its title.
+   */
   color?: { ink: string; shade: string };
+  /** Shown before the title, e.g. a logo. */
+  icon?: ReactNode;
 };
 
-export function Button({ title, variant = 'primary', color, disabled, ...rest }: ButtonProps) {
+export function Button({
+  title,
+  variant = 'primary',
+  color,
+  icon,
+  disabled,
+  ...rest
+}: ButtonProps) {
   const isPrimary = variant === 'primary';
 
   return (
@@ -25,10 +38,12 @@ export function Button({ title, variant = 'primary', color, disabled, ...rest }:
         disabled && styles.disabled,
       ]}
       {...rest}>
+      {icon}
       <Text
         style={[
           styles.label,
           isPrimary ? styles.primaryLabel : styles.secondaryLabel,
+          !isPrimary && color && { color: color.ink },
           disabled && styles.disabledLabel,
         ]}>
         {title}
@@ -44,6 +59,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     borderRadius: radius.button,
     borderBottomWidth: 4,
+    flexDirection: 'row',
+    gap: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
