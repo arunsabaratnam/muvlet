@@ -15,9 +15,14 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { CoachFiles, useLoadCoachFiles } from '@/features/welcome/coach';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  // Coaches load alongside the fonts, so they're ready by the time the first screen opens.
+  const coachFiles = useLoadCoachFiles();
+
   const [loaded, error] = useFonts({
     BricolageGrotesque_700Bold,
     BricolageGrotesque_800ExtraBold,
@@ -39,11 +44,11 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <CoachFiles value={coachFiles}>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
       </Stack>
-    </>
+    </CoachFiles>
   );
 }
