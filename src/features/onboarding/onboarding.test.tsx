@@ -1,9 +1,10 @@
 import { router, Stack } from 'expo-router';
-import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
 import { Text } from 'react-native';
 import * as Reanimated from 'react-native-reanimated';
 
 import OnboardingLayout from './onboarding-layout';
+import { BuildStep, PlanStep, SaveStep } from './plan-steps';
 import {
   AboutStep,
   DaysStep,
@@ -13,10 +14,20 @@ import {
   LimitsStep,
   PlaceStep,
 } from './questions';
+import { RemindersStep } from './reminders-step';
+import { SignUpStep } from './sign-up-step';
 
 jest.mock('react-native-worklets', () => jest.requireActual('react-native-worklets/src/mock'));
 // Rive is native code that doesn't run in Jest.
 jest.mock('@/features/welcome/coach', () => ({ Coach: () => null }));
+
+// The phone's notification prompt, answered "Don't Allow".
+const mockRequestPermissions = jest.fn(async () => ({ granted: false }));
+jest.mock('expo-notifications', () => ({
+  AndroidImportance: { DEFAULT: 5 },
+  setNotificationChannelAsync: async () => null,
+  requestPermissionsAsync: () => mockRequestPermissions(),
+}));
 
 // expo-router's test helpers swap in Reanimated's plain mock, which lacks useReducedMotion.
 // With reduced motion Rex's hello shows at once, so nothing types in the background.
@@ -36,6 +47,11 @@ async function start(step = 'intro') {
       'onboarding/place': PlaceStep,
       'onboarding/about': AboutStep,
       'onboarding/limits': LimitsStep,
+      'onboarding/build': BuildStep,
+      'onboarding/plan': PlanStep,
+      'onboarding/save': SaveStep,
+      'onboarding/sign-up': SignUpStep,
+      'onboarding/reminders': RemindersStep,
     },
     { initialUrl: `/onboarding/${step}` },
   );
@@ -46,6 +62,19 @@ async function start(step = 'intro') {
 // Every step keeps its Continue mounted underneath the next one, so press the last.
 async function pressContinue() {
   await fireEvent.press(screen.getAllByText('Continue').at(-1)!);
+}
+
+// From the intro to the last question, picking "Lose some fat".
+async function answerEverything() {
+  await pressContinue();
+  await fireEvent.press(screen.getByText('Lose some fat'));
+  await pressContinue();
+  await fireEvent.press(screen.getByText('Never lifted'));
+  await pressContinue();
+  await pressContinue();
+  await pressContinue();
+  await fireEvent.press(screen.getByText('Female'));
+  await pressContinue();
 }
 
 function isChecked(name: string) {
@@ -125,21 +154,92 @@ test('the steppers change height and weight in the units picked', async () => {
 
 test('the whole flow ends on Today, with no way back into it', async () => {
   const app = await start();
-  await pressContinue();
-  await fireEvent.press(screen.getByText('Lose some fat'));
-  await pressContinue();
-  await fireEvent.press(screen.getByText('Never lifted'));
-  await pressContinue();
-  await pressContinue();
-  await pressContinue();
-  await fireEvent.press(screen.getByText('Female'));
-  await pressContinue();
+  await answerEverything();
   expect(app.pathname()).toBe('/onboarding/limits');
 
   await fireEvent.press(screen.getByText('Knees'));
   await pressContinue();
+  // With reduced motion the coaches build the plan at once.
+  expect(await screen.findByText('Your plan is ready!')).toBeOnTheScreen();
+  expect(screen.getByText('1,900')).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Looks good'));
+  expect(app.pathname()).toBe('/onboarding/save');
+  await fireEvent.press(screen.getByText('Later'));
+  expect(app.pathname()).toBe('/onboarding/reminders');
+  await fireEvent.press(screen.getByText('Not now'));
   expect(app.pathname()).toBe('/today');
   expect(router.canGoBack()).toBe(false);
+});
+
+test('the plan goes back to the last question, or to the first to change answers', async () => {
+  const app = await start();
+  await answerEverything();
+  await pressContinue();
+  await screen.findByText('Your plan is ready!');
+
+  // The build screen isn't shown again.
+  await act(async () => fireEvent.press(screen.getByRole('button', { name: 'Back' })));
+  expect(app.pathname()).toBe('/onboarding/limits');
+
+  await pressContinue();
+  await screen.findByText('Your plan is ready!');
+  await fireEvent.press(screen.getByText('Change my answers'));
+  expect(app.pathname()).toBe('/onboarding/goal');
+  // The answers are kept.
+  await pressContinue();
+  expect(app.pathname()).toBe('/onboarding/experience');
+});
+
+test('skipping About you leaves food targets for later', async () => {
+  await start('about');
+  await fireEvent.press(screen.getByText('Skip'));
+  await pressContinue();
+  await screen.findByText('Your plan is ready!');
+  expect(screen.getByText('Food targets')).toBeOnTheScreen();
+  expect(screen.queryByText('calories a day')).toBeNull();
+});
+
+test('email sign-up checks the form before moving on', async () => {
+  const app = await start('save');
+  await fireEvent.press(screen.getByText('Continue with email'));
+  expect(app.pathname()).toBe('/onboarding/sign-up');
+
+  const create = () => screen.getByRole('button', { name: 'Create account' });
+  await fireEvent.changeText(screen.getByLabelText('What should we call you?'), 'Arun');
+  await fireEvent.changeText(screen.getByLabelText('Email'), 'arun@example');
+  await fireEvent.changeText(screen.getByLabelText('Password'), 'muvlet1');
+  expect(screen.getByText('Too short. Use 8 or more characters.')).toBeOnTheScreen();
+  expect(create()).toBeDisabled();
+
+  await fireEvent.changeText(screen.getByLabelText('Password'), 'muvlet12');
+  expect(screen.getByText('Good password.')).toBeOnTheScreen();
+  expect(create()).toBeDisabled();
+
+  await fireEvent.changeText(screen.getByLabelText('Email'), 'arun@example.com');
+  expect(create()).toBeEnabled();
+  await fireEvent.press(create());
+  expect(app.pathname()).toBe('/onboarding/reminders');
+});
+
+test('turning on reminders asks the phone first', async () => {
+  const app = await start('reminders');
+  expect(screen.getByText('Push day at 6 PM. Ready when you are.')).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Turn on reminders'));
+  expect(mockRequestPermissions).toHaveBeenCalled();
+  await waitFor(() => expect(app.pathname()).toBe('/today'));
+});
+
+test('with reminders off there is nothing to ask', async () => {
+  const app = await start('reminders');
+  mockRequestPermissions.mockClear();
+  await fireEvent.press(screen.getByText('Off'));
+  expect(screen.queryByText(/Ready when you are/)).toBeNull();
+
+  await pressContinue();
+  expect(mockRequestPermissions).not.toHaveBeenCalled();
+  expect(app.pathname()).toBe('/today');
 });
 
 test('Back returns to the step before', async () => {

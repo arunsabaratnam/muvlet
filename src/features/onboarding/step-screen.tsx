@@ -1,4 +1,4 @@
-import { Children, type ReactNode } from 'react';
+import { Children, isValidElement, useState, type ReactNode } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, withDelay, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,6 +22,8 @@ export function StepScreen({
 }) {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  // Some steps have more than one button, so the answers end wherever the buttons start.
+  const [footerHeight, setFooterHeight] = useState(BUTTON_HEIGHT);
   // Same spot as the welcome screen's buttons.
   const footerBottom = 34 + insets.bottom;
   const side = width * 0.06;
@@ -29,16 +31,21 @@ export function StepScreen({
   return (
     <View style={styles.screen}>
       <ScrollView
-        style={[styles.body, { top: height * 0.3, bottom: footerBottom + BUTTON_HEIGHT + 16 }]}
+        style={[styles.body, { top: height * 0.3, bottom: footerBottom + footerHeight + 16 }]}
         contentContainerStyle={[styles.sections, { paddingHorizontal: side }]}
         showsVerticalScrollIndicator={false}>
         {Children.toArray(children).map((section, i) => (
-          <Animated.View key={i} entering={slideIn(enterDelay + i * 70, width * 0.26)}>
+          // Keyed by the section, so one coming or going doesn't slide the others in again.
+          <Animated.View
+            key={isValidElement(section) ? section.key : i}
+            entering={slideIn(enterDelay + i * 70, width * 0.26)}>
             {section}
           </Animated.View>
         ))}
       </ScrollView>
-      <View style={[styles.footer, { bottom: footerBottom, left: side, right: side }]}>
+      <View
+        onLayout={(event) => setFooterHeight(event.nativeEvent.layout.height)}
+        style={[styles.footer, { bottom: footerBottom, left: side, right: side }]}>
         {footer}
       </View>
     </View>

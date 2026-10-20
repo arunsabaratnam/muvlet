@@ -18,6 +18,7 @@ export const colors = {
   disabled: '#E5E8EF',
   disabledEdge: '#D5DAE4',
   success: '#2FAE6B',
+  warning: '#F2BF3A',
   danger: '#E5484D',
 } as const;
 
