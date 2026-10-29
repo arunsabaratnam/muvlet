@@ -261,9 +261,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fonts.bodyExtraBold,
-    fontSize: 12,
-    letterSpacing: 0.96,
-    textTransform: 'uppercase',
+    fontSize: 13,
     color: colors.textMuted,
   },
   hint: {

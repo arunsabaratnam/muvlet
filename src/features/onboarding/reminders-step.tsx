@@ -157,8 +157,6 @@ const styles = StyleSheet.create({
   meta: {
     fontFamily: fonts.bodyBold,
     fontSize: 11,
-    letterSpacing: 0.44,
-    textTransform: 'uppercase',
     color: colors.textMuted,
   },
   sender: {
