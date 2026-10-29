@@ -77,11 +77,6 @@ export function toggle(list: string[], item: string, only?: string): string[] {
   return next.length || !only ? next : [only];
 }
 
-/** Moves a number by `by`, kept within `min` and `max`. */
-export function stepBy(value: number, by: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value + by));
-}
-
 /** Height as the user reads it: feet and inches with lb, centimetres with kg. */
 export function formatHeight(cm: number, units: Units) {
   if (units === 'kg') return `${Math.round(cm)} cm`;
@@ -91,6 +86,38 @@ export function formatHeight(cm: number, units: Units) {
 
 export function formatWeight(kg: number, units: Units) {
   return units === 'kg' ? `${Math.round(kg)} kg` : `${Math.round(kg / KG_PER_LB)} lb`;
+}
+
+/** The rows on a picker wheel: what each one shows and the stored value it stands for. */
+export type WheelOptions = { labels: string[]; values: number[] };
+
+function range(from: number, to: number) {
+  return Array.from({ length: to - from + 1 }, (_, i) => from + i);
+}
+
+/** Inch by inch with lb (4′ 4″ to 7′ 2″), centimetre by centimetre with kg. Stored in cm. */
+export function heightOptions(units: Units): WheelOptions {
+  const values = units === 'lb' ? range(52, 86).map((inches) => inches * 2.54) : range(130, 220);
+  return { values, labels: values.map((cm) => formatHeight(cm, units)) };
+}
+
+/** Pound by pound with lb, kilogram by kilogram with kg. Stored in kg. */
+export function weightOptions(units: Units): WheelOptions {
+  const values = units === 'lb' ? range(80, 400).map((lb) => lb * KG_PER_LB) : range(36, 181);
+  return { values, labels: values.map((kg) => formatWeight(kg, units)) };
+}
+
+export function ageOptions(): WheelOptions {
+  const values = range(13, 90);
+  return { values, labels: values.map(String) };
+}
+
+/** The row whose value is closest to `value`. */
+export function nearestRow(values: number[], value: number) {
+  return values.reduce(
+    (best, v, i) => (Math.abs(v - value) < Math.abs(values[best] - value) ? i : best),
+    0,
+  );
 }
 
 type AnswersContext = {

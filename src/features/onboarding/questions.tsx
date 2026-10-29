@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -13,17 +14,28 @@ import { Button } from '@/components/ui';
 import { coachColors } from '@/constants/theme';
 
 import {
-  formatHeight,
-  formatWeight,
-  KG_PER_LB,
+  ageOptions,
+  heightOptions,
   KITS,
-  stepBy,
+  nearestRow,
   toggle,
   useAnswers,
+  weightOptions,
+  type Answers,
   type Experience,
   type Goal,
+  type Units,
+  type WheelOptions,
 } from './answers';
-import { Chips, DayPicker, OptionRows, Section, Segmented, Stepper, type Option } from './controls';
+import {
+  Chips,
+  DayPicker,
+  OptionRows,
+  PickerRow,
+  Section,
+  Segmented,
+  type Option,
+} from './controls';
 import {
   DumbbellIcon,
   FlameIcon,
@@ -36,6 +48,7 @@ import {
 import { usePlayCoach } from './onboarding-layout';
 import { StepScreen } from './step-screen';
 import { GOAL_COACH, goOn, STEPS, type StepId } from './steps';
+import { WheelSheet } from './wheel-sheet';
 
 /* The intro and the six questions (design spec 4.2). The coach and bubble live in the layout. */
 
@@ -273,72 +286,104 @@ export function PlaceStep() {
   );
 }
 
+// The three numbers on About you, each picked on a wheel in a sheet.
+const PICKERS = {
+  height: { label: 'Height', title: 'Your height', field: 'heightCm', options: heightOptions },
+  weight: { label: 'Weight', title: 'Your weight', field: 'weightKg', options: weightOptions },
+  age: { label: 'Age', title: 'Your age', field: 'age', options: ageOptions },
+} satisfies Record<
+  string,
+  {
+    label: string;
+    title: string;
+    field: keyof Answers;
+    options: (units: Units) => WheelOptions;
+  }
+>;
+type Picker = keyof typeof PICKERS;
+
 export function AboutStep() {
   const { answers, update } = useAnswers();
   const play = usePlayCoach();
   const tint = tintOf('about');
   const { units } = answers;
+  // The sheet keeps its last picker while it fades out.
+  const [sheet, setSheet] = useState<{ picker: Picker; open: boolean }>({
+    picker: 'height',
+    open: false,
+  });
+
+  const unitsSwitch = (
+    <Segmented
+      options={['lb', 'kg'] as const}
+      value={units}
+      tint={tint}
+      onChange={(next) => update({ units: next })}
+    />
+  );
+
+  const rowOf = (picker: Picker) => {
+    const { field, options } = PICKERS[picker];
+    const { labels, values } = options(units);
+    return { labels, values, index: nearestRow(values, answers[field]) };
+  };
+  const shown = PICKERS[sheet.picker];
+  const wheel = rowOf(sheet.picker);
 
   return (
-    <StepScreen
-      footer={
-        // Continuing (not skipping) puts the food targets back on the plan.
-        <Continue
-          step="about"
-          disabled={!answers.sex}
-          onPress={() => update({ skippedAbout: false })}
-        />
-      }>
-      <Section>
-        <Segmented
-          options={['lb', 'kg'] as const}
-          value={units}
-          tint={tint}
-          onChange={(next) => update({ units: next })}
-        />
-      </Section>
-      <Section label="Calculate calories as">
-        <Segmented
-          options={['Male', 'Female'] as const}
-          value={answers.sex}
-          tint={tint}
-          onChange={(sex) => {
-            update({ sex });
-            play('nod');
-          }}
-        />
-      </Section>
-      <Stepper
-        label="Height"
-        value={formatHeight(answers.heightCm, units)}
+    <>
+      <StepScreen
+        footer={
+          // Continuing (not skipping) puts the food targets back on the plan.
+          <Continue
+            step="about"
+            disabled={!answers.sex}
+            onPress={() => update({ skippedAbout: false })}
+          />
+        }>
+        <Section>{unitsSwitch}</Section>
+        <Section label="Calculate calories as">
+          <Segmented
+            options={['Male', 'Female'] as const}
+            value={answers.sex}
+            tint={tint}
+            onChange={(sex) => {
+              update({ sex });
+              play('nod');
+            }}
+          />
+        </Section>
+        {(Object.keys(PICKERS) as Picker[]).map((picker) => {
+          const { labels, index } = rowOf(picker);
+          return (
+            <PickerRow
+              key={picker}
+              label={PICKERS[picker].label}
+              value={labels[index]}
+              tint={tint}
+              active={sheet.open && sheet.picker === picker}
+              onPress={() => setSheet({ picker, open: true })}
+            />
+          );
+        })}
+      </StepScreen>
+      <WheelSheet
+        visible={sheet.open}
+        title={shown.title}
+        label={shown.label}
+        options={wheel.labels}
+        index={wheel.index}
         tint={tint}
-        // An inch at a time with lb, a centimetre with kg.
-        onStep={(by) =>
-          update({ heightCm: stepBy(answers.heightCm, by * (units === 'lb' ? 2.54 : 1), 130, 220) })
+        header={
+          sheet.picker === 'age' ? undefined : <View style={styles.sheetUnits}>{unitsSwitch}</View>
         }
+        onChange={(index) => {
+          update({ [shown.field]: wheel.values[index] });
+          play('nod');
+        }}
+        onClose={() => setSheet({ ...sheet, open: false })}
       />
-      <Stepper
-        label="Weight"
-        value={formatWeight(answers.weightKg, units)}
-        tint={tint}
-        onStep={(by) =>
-          update({
-            weightKg: stepBy(
-              answers.weightKg,
-              by * (units === 'lb' ? KG_PER_LB : 1),
-              80 * KG_PER_LB,
-              400 * KG_PER_LB,
-            ),
-          })
-        }
-      />
-      <Stepper
-        label="Age"
-        value={String(answers.age)}
-        tint={tint}
-        onStep={(by) => update({ age: stepBy(answers.age, by, 13, 90) })}
-      />
-    </StepScreen>
+    </>
   );
 }
 
@@ -361,3 +406,9 @@ export function LimitsStep() {
     </StepScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  sheetUnits: {
+    width: 132,
+  },
+});

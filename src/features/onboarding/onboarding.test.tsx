@@ -16,6 +16,7 @@ import {
 } from './questions';
 import { RemindersStep } from './reminders-step';
 import { SignUpStep } from './sign-up-step';
+import { WHEEL_ROW } from './wheel-sheet';
 
 jest.mock('react-native-worklets', () => jest.requireActual('react-native-worklets/src/mock'));
 // Rive is native code that doesn't run in Jest.
@@ -139,17 +140,45 @@ test('About you needs Male or Female to continue, but can be skipped', async () 
   expect(app.pathname()).toBe('/onboarding/limits');
 });
 
-test('the steppers change height and weight in the units picked', async () => {
+test('height, weight and age are picked on a wheel, in the units picked', async () => {
   await start('about');
-  expect(screen.getByText('5′ 9″')).toBeOnTheScreen();
-  expect(screen.getByText('170 lb')).toBeOnTheScreen();
+  expect(screen.getByRole('button', { name: 'Height, 5′ 9″' })).toBeOnTheScreen();
 
-  await fireEvent.press(screen.getByRole('button', { name: 'More weight' }));
-  expect(screen.getByText('171 lb')).toBeOnTheScreen();
+  await fireEvent.press(screen.getByRole('button', { name: 'Weight, 170 lb' }));
+  expect(screen.getByText('Your weight')).toBeOnTheScreen();
+  await fireEvent(screen.getByRole('adjustable', { name: 'Weight' }), 'accessibilityAction', {
+    nativeEvent: { actionName: 'increment' },
+  });
+  await fireEvent.press(screen.getByText('Done'));
+  expect(screen.queryByText('Your weight')).not.toBeOnTheScreen();
+  expect(screen.getByRole('button', { name: 'Weight, 171 lb' })).toBeOnTheScreen();
 
   await fireEvent.press(screen.getByText('kg'));
-  expect(screen.getByText('78 kg')).toBeOnTheScreen();
-  expect(screen.getByText('175 cm')).toBeOnTheScreen();
+  expect(screen.getByRole('button', { name: 'Weight, 78 kg' })).toBeOnTheScreen();
+  expect(screen.getByRole('button', { name: 'Height, 175 cm' })).toBeOnTheScreen();
+});
+
+test('a flick of the wheel picks the row it stops on', async () => {
+  await start('about');
+  await fireEvent.press(screen.getByRole('button', { name: 'Age, 28' }));
+  // The wheel's rows run from 13, so the 22nd row is 35.
+  await fireEvent(screen.getByTestId('wheel'), 'momentumScrollEnd', {
+    nativeEvent: { contentOffset: { y: WHEEL_ROW * 22 } },
+  });
+  await fireEvent.press(screen.getByText('Done'));
+  expect(screen.getByRole('button', { name: 'Age, 35' })).toBeOnTheScreen();
+});
+
+test('the units switch in the sheet changes the rows too', async () => {
+  await start('about');
+  await fireEvent.press(screen.getByRole('button', { name: 'Height, 5′ 9″' }));
+  // The screen's switch sits under the sheet, so the sheet's is the last one.
+  await fireEvent.press(screen.getAllByText('kg').at(-1)!);
+  expect(screen.getByRole('adjustable', { name: 'Height' })).toHaveAccessibilityValue({
+    text: '175 cm',
+  });
+  await fireEvent.press(screen.getByText('Done'));
+  expect(screen.getByRole('button', { name: 'Weight, 77 kg' })).toBeOnTheScreen();
 });
 
 test('the whole flow ends on Today, with no way back into it', async () => {
