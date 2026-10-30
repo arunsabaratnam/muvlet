@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -11,12 +11,13 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Button } from '@/components/ui';
-import { coachColors, colors } from '@/constants/theme';
+import { coachColors, colors, fonts } from '@/constants/theme';
 
 import {
   ageOptions,
+  BODY_ONLY,
+  GYM_KIT,
   heightOptions,
-  KITS,
   nearestRow,
   toggle,
   useAnswers,
@@ -24,11 +25,11 @@ import {
   type Answers,
   type Experience,
   type Goal,
+  type Place,
   type WheelOptions,
 } from './answers';
 import {
   CheckRow,
-  Chips,
   DayPicker,
   OptionRows,
   PickerRow,
@@ -40,23 +41,30 @@ import {
 } from './controls';
 import {
   BodyIcon,
+  BodyweightIcon,
+  BothIcon,
   CheckCircleIcon,
+  DialIcon,
   DotsIcon,
   DumbbellIcon,
   FlameIcon,
+  GymIcon,
   HeartIcon,
+  HomeIcon,
+  PlusIcon,
   SeedIcon,
   SproutIcon,
   StarIcon,
   TreeIcon,
   type BodyArea,
 } from './icons';
+import { extrasIn, HOME_KIT, KitSheet, KitWell } from './kit';
 import { usePlayCoach } from './onboarding-layout';
 import { StepScreen } from './step-screen';
 import { GOAL_COACH, goOn, STEPS, type StepId } from './steps';
 import { WheelSheet } from './wheel-sheet';
 
-/* The intro and the six questions (design spec 4.2). The coach and bubble live in the layout. */
+/* The intro and the questions (design spec 4.2). The coach and bubble live in the layout. */
 
 // Continue pulses once Rex has finished typing his hello.
 const PULSE_AFTER_MS = 3900;
@@ -67,10 +75,13 @@ function tintOf(step: StepId) {
 
 function Continue({
   step,
+  next,
   disabled,
   onPress,
 }: {
   step: StepId;
+  /** Where to go instead of the step's usual next. */
+  next?: StepId;
   disabled?: boolean;
   onPress?: () => void;
 }) {
@@ -81,7 +92,7 @@ function Continue({
       disabled={disabled}
       onPress={() => {
         onPress?.();
-        goOn(step);
+        goOn(step, next);
       }}
     />
   );
@@ -236,58 +247,150 @@ export function DaysStep() {
   );
 }
 
-const EQUIPMENT = [
-  'Dumbbells',
-  'Barbell',
-  'Bench',
-  'Machines',
-  'Cables',
-  'Kettlebells',
-  'Bands',
-  'Just my body',
+const PLACES: Option<Place>[] = [
+  {
+    value: 'Gym',
+    label: 'At a gym',
+    icon: (color) => <GymIcon color={color} />,
+    tint: coachColors.rex,
+  },
+  {
+    value: 'Home',
+    label: 'At home',
+    icon: (color) => <HomeIcon color={color} />,
+    tint: coachColors.sage,
+  },
+  {
+    value: 'Both',
+    label: 'A bit of both',
+    icon: (color) => <BothIcon color={color} />,
+    tint: coachColors.luna,
+  },
 ];
 
 export function PlaceStep() {
   const { answers, update } = useAnswers();
   const play = usePlayCoach();
-  const tint = tintOf('place');
+  return (
+    <StepScreen
+      footer={
+        <Continue
+          step="place"
+          disabled={!answers.place}
+          next={answers.place === 'Gym' ? 'minutes' : 'kit'}
+        />
+      }>
+      <OptionRows
+        options={PLACES}
+        value={answers.place}
+        tint={tintOf('place')}
+        onChange={(place) => {
+          // A new place starts the kit afresh; coming back to the same one keeps it.
+          if (place !== answers.place) update({ place, equipment: place === 'Gym' ? GYM_KIT : [] });
+          play('nod');
+        }}
+      />
+    </StepScreen>
+  );
+}
+
+export function KitStep() {
+  const { answers, update } = useAnswers();
+  const play = usePlayCoach();
+  const tint = tintOf('kit');
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const extras = extrasIn(answers.equipment);
+  const pick = (item: string) => {
+    update({ equipment: toggle(answers.equipment, item, BODY_ONLY) });
+    play('nod');
+  };
 
   return (
-    <StepScreen footer={<Continue step="place" disabled={!answers.equipment.length} />}>
-      <Section>
-        <Segmented
-          options={['Gym', 'Home', 'Both'] as const}
-          value={answers.place}
+    <>
+      <StepScreen footer={<Continue step="kit" disabled={!answers.equipment.length} />}>
+        <CheckRow
+          label="Nothing, just my body"
+          icon={(color) => <BodyweightIcon color={color} />}
+          on={answers.equipment.includes(BODY_ONLY)}
           tint={tint}
-          onChange={(place) => {
-            update({ place, equipment: KITS[place] });
-            play('nod');
-          }}
+          onPress={() => pick(BODY_ONLY)}
         />
-      </Section>
-      <Section label="What do you have?">
-        <Chips
-          options={EQUIPMENT}
-          value={answers.equipment}
-          tint={tint}
-          onToggle={(item) => {
-            update({ equipment: toggle(answers.equipment, item, 'Just my body') });
-            play('nod');
-          }}
-        />
-      </Section>
-      <Section label="Time per session">
-        <Segmented
-          options={[20, 30, 45, 60]}
-          value={answers.minutes}
-          tint={tint}
-          suffix=" min"
-          onChange={(minutes) => {
-            update({ minutes });
-            play('nod');
-          }}
-        />
-      </Section>
+        <Section label="Or tick what you've got">
+          <TileGrid>
+            {HOME_KIT.map((kit) => (
+              <Tile
+                key={kit.name}
+                label={kit.name}
+                on={answers.equipment.includes(kit.name)}
+                tint={tint}
+                icon={<KitWell kit={kit} />}
+                onPress={() => pick(kit.name)}
+              />
+            ))}
+            {/* Anything not on the tiles: picked from a longer list, or typed in. */}
+            <Tile
+              label="More kit"
+              role="button"
+              dashed
+              on={extras.length > 0}
+              count={extras.length}
+              tint={tint}
+              icon={
+                <View style={[styles.moreWell, extras.length > 0 && styles.moreWellOn]}>
+                  <PlusIcon color={extras.length ? tint.ink : colors.textMuted} />
+                </View>
+              }
+              onPress={() => setSheetOpen(true)}
+            />
+          </TileGrid>
+        </Section>
+        {extras.length ? (
+          <View style={styles.extras}>
+            <Text style={styles.extrasLabel}>Also</Text>
+            {extras.map((item) => (
+              <Text
+                key={item}
+                style={[
+                  styles.extra,
+                  { borderColor: tint.ink, backgroundColor: tint.wash, color: tint.shade },
+                ]}>
+                {item}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+      </StepScreen>
+      <KitSheet
+        visible={sheetOpen}
+        value={answers.equipment}
+        tint={tint}
+        onToggle={pick}
+        onClose={() => setSheetOpen(false)}
+      />
+    </>
+  );
+}
+
+const MINUTES: Option<number>[] = [20, 30, 45, 60].map((minutes) => ({
+  value: minutes,
+  label: `${minutes} min`,
+  icon: (color) => <DialIcon color={color} minutes={minutes} />,
+}));
+
+export function MinutesStep() {
+  const { answers, update } = useAnswers();
+  const play = usePlayCoach();
+  return (
+    <StepScreen footer={<Continue step="minutes" />}>
+      <OptionRows
+        options={MINUTES}
+        value={answers.minutes}
+        tint={tintOf('minutes')}
+        onChange={(minutes) => {
+          update({ minutes });
+          play('nod');
+        }}
+      />
     </StepScreen>
   );
 }
@@ -483,5 +586,38 @@ export function LimitsStep() {
 const styles = StyleSheet.create({
   sheetUnits: {
     width: 132,
+  },
+  moreWell: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceMuted,
+  },
+  moreWellOn: {
+    backgroundColor: colors.surface,
+  },
+  extras: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 6,
+  },
+  extrasLabel: {
+    marginLeft: 4,
+    marginRight: 2,
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  extra: {
+    overflow: 'hidden',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 2,
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 13,
   },
 });

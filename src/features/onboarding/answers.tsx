@@ -24,7 +24,8 @@ export type Answers = {
   /** Training days, 0 = Sunday. */
   days: number[];
   time: TimeOfDay;
-  place: Place;
+  place: Place | null;
+  /** At a gym, GYM_KIT; at home or both, what was ticked on What's at home. */
   equipment: string[];
   minutes: number;
   heightUnits: HeightUnits;
@@ -42,12 +43,11 @@ export type Answers = {
 
 export const KG_PER_LB = 0.4536;
 
-/** Equipment preselected for each place (the user can still change it). */
-export const KITS: Record<Place, string[]> = {
-  Gym: ['Dumbbells', 'Barbell', 'Bench', 'Machines', 'Cables'],
-  Home: ['Dumbbells', 'Just my body'],
-  Both: ['Dumbbells', 'Barbell', 'Bench', 'Machines', 'Cables', 'Bands'],
-};
+/** What a gym has. The plan takes it as given there, so gym users aren't asked. */
+export const GYM_KIT = ['Dumbbells', 'Barbell', 'Bench', 'Machines', 'Cables'];
+
+/** The "none of these" choice on What's at home. */
+export const BODY_ONLY = 'Just my body';
 
 // Starting answers, as in the mockup.
 export const DEFAULT_ANSWERS: Answers = {
@@ -55,8 +55,8 @@ export const DEFAULT_ANSWERS: Answers = {
   experience: null,
   days: [1, 3, 5],
   time: 'Evening',
-  place: 'Gym',
-  equipment: KITS.Gym,
+  place: null,
+  equipment: [],
   minutes: 45,
   heightUnits: 'ft',
   weightUnits: 'lb',
