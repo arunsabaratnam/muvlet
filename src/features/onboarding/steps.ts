@@ -59,7 +59,6 @@ export const STEPS: Record<StepId, Step> = {
     coach: 'luna',
     next: 'build',
     question: 'Anything we should go easy on?',
-    skippable: true,
     bar: true,
   },
   // All four coaches work on the plan here; Rex leads the screens after it.

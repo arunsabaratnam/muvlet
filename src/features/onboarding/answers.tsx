@@ -35,6 +35,7 @@ export type Answers = {
   age: number;
   /** True when About you was skipped, so the plan leaves out food targets. */
   skippedAbout: boolean;
+  /** Body areas to go easy on, or just "Nothing". Empty until answered. */
   limits: string[];
   reminders: Reminders;
 };
@@ -64,7 +65,7 @@ export const DEFAULT_ANSWERS: Answers = {
   weightKg: 170 * KG_PER_LB,
   age: 28,
   skippedAbout: false,
-  limits: ['Nothing'],
+  limits: [],
   reminders: 'Gentle',
 };
 

@@ -143,6 +143,27 @@ test('About you needs Male or Female to continue, but can be skipped', async () 
   expect(app.pathname()).toBe('/onboarding/limits');
 });
 
+test('nothing to go easy on is one tap, and clears any areas picked', async () => {
+  const app = await start('limits');
+  await pressContinue();
+  expect(app.pathname()).toBe('/onboarding/limits');
+
+  await fireEvent.press(screen.getByText('Knees'));
+  await fireEvent.press(screen.getByText('Lower back'));
+  expect(isChecked('Knees')).toBe(true);
+  expect(isChecked('Lower back')).toBe(true);
+
+  await fireEvent.press(screen.getByText("I'm all good, nothing hurts"));
+  expect(isChecked("I'm all good, nothing hurts")).toBe(true);
+  expect(isChecked('Knees')).toBe(false);
+  expect(isChecked('Lower back')).toBe(false);
+
+  await fireEvent.press(screen.getByText('Ankles'));
+  expect(isChecked("I'm all good, nothing hurts")).toBe(false);
+  await pressContinue();
+  expect(await screen.findByText('Your plan is ready!')).toBeOnTheScreen();
+});
+
 test('height, weight and age are picked on a wheel in a sheet', async () => {
   await start('about');
   // Units live in the sheets now, not on the screen.
@@ -275,6 +296,7 @@ test('the whole flow ends on Today, with no way back into it', async () => {
 test('the plan goes back to the last question, or to the first to change answers', async () => {
   const app = await start();
   await answerEverything();
+  await fireEvent.press(screen.getByText("I'm all good, nothing hurts"));
   await pressContinue();
   await screen.findByText('Your plan is ready!');
 
@@ -294,6 +316,7 @@ test('the plan goes back to the last question, or to the first to change answers
 test('skipping About you leaves food targets for later', async () => {
   await start('about');
   await fireEvent.press(screen.getByText('Skip'));
+  await fireEvent.press(screen.getByText("I'm all good, nothing hurts"));
   await pressContinue();
   await screen.findByText('Your plan is ready!');
   expect(screen.getByText('Food targets')).toBeOnTheScreen();
