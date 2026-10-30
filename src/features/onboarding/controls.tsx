@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts } from '@/constants/theme';
 
+import { ChevronIcon } from './icons';
+
 /* The answer controls on the question steps, styled like the mockup. */
 
 /** A coach's colours: `ink` for picked answers, `wash` behind them, `shade` for their text. */
@@ -190,58 +192,35 @@ export function DayPicker({
   );
 }
 
-/** A labelled row with − and + buttons around its value. */
-export function Stepper({
+/** A labelled row showing its value; pressing it opens a picker for that value. */
+export function PickerRow({
   label,
   value,
   tint,
-  onStep,
+  active,
+  onPress,
 }: {
   label: string;
   value: string;
   tint: Tint;
-  onStep: (by: 1 | -1) => void;
-}) {
-  return (
-    <View style={styles.stepper}>
-      <Text style={styles.stepperLabel}>{label}</Text>
-      <View style={styles.stepperControls}>
-        <StepButton
-          sign="−"
-          label={`Less ${label.toLowerCase()}`}
-          tint={tint}
-          onPress={() => onStep(-1)}
-        />
-        <Text style={styles.stepperValue}>{value}</Text>
-        <StepButton
-          sign="+"
-          label={`More ${label.toLowerCase()}`}
-          tint={tint}
-          onPress={() => onStep(1)}
-        />
-      </View>
-    </View>
-  );
-}
-
-function StepButton({
-  sign,
-  label,
-  tint,
-  onPress,
-}: {
-  sign: string;
-  label: string;
-  tint: Tint;
+  /** True while its picker is open. */
+  active?: boolean;
   onPress: () => void;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={`${label}, ${value}`}
+      accessibilityHint="Opens a picker"
       onPress={onPress}
-      style={[styles.stepperButton, { backgroundColor: tint.wash }]}>
-      <Text style={[styles.stepperSign, { color: tint.shade }]}>{sign}</Text>
+      style={({ pressed }) => [
+        styles.pickerRow,
+        active && { borderColor: tint.ink, backgroundColor: tint.wash },
+        pressed && styles.pressed,
+      ]}>
+      <Text style={styles.pickerLabel}>{label}</Text>
+      <Text style={[styles.pickerValue, { color: tint.shade }]}>{value}</Text>
+      <ChevronIcon color={active ? tint.shade : colors.textMuted} />
     </Pressable>
   );
 }
@@ -365,45 +344,29 @@ const styles = StyleSheet.create({
   dayLabelOn: {
     color: colors.onPrimary,
   },
-  stepper: {
+  pickerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 11,
+    gap: 10,
+    minHeight: 60,
     paddingLeft: 16,
-    paddingRight: 12,
+    paddingRight: 14,
     borderRadius: 18,
     borderWidth: 2,
+    borderBottomWidth: 6,
     borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
-  stepperLabel: {
+  pickerLabel: {
+    flex: 1,
     fontFamily: fonts.bodyExtraBold,
     fontSize: 16,
     color: colors.text,
   },
-  stepperControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  stepperButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepperSign: {
+  pickerValue: {
     fontFamily: fonts.bodyExtraBold,
-    fontSize: 20,
-    lineHeight: 22,
-  },
-  stepperValue: {
-    minWidth: 66,
-    textAlign: 'center',
-    fontFamily: fonts.bodyExtraBold,
-    fontSize: 17,
+    fontSize: 18,
     fontVariant: ['tabular-nums'],
-    color: colors.text,
   },
   textButton: {
     alignSelf: 'center',
