@@ -30,15 +30,17 @@ export function Section({
   );
 }
 
-export type Option<T extends string> = {
+export type Option<T extends string | number> = {
   value: T;
+  /** What the row says, when it isn't the value itself. */
+  label?: string;
   icon: (color: string) => ReactNode;
   /** Colours for this option when picked; defaults to the step's. */
   tint?: Tint;
 };
 
 /** Big rows with an icon, one of which can be picked. */
-export function OptionRows<T extends string>({
+export function OptionRows<T extends string | number>({
   options,
   value,
   tint,
@@ -68,7 +70,7 @@ export function OptionRows<T extends string>({
             <View style={[styles.rowIcon, { backgroundColor: own.wash }]}>
               {option.icon(own.ink)}
             </View>
-            <Text style={styles.rowLabel}>{option.value}</Text>
+            <Text style={styles.rowLabel}>{option.label ?? option.value}</Text>
           </Pressable>
         );
       })}
@@ -154,6 +156,7 @@ export function Tile({
   return (
     <Pressable
       accessibilityRole={role}
+      accessibilityLabel={count ? `${label}, ${count} added` : undefined}
       accessibilityState={role === 'checkbox' ? { checked: on } : undefined}
       onPress={onPress}
       style={({ pressed }) => [
@@ -208,41 +211,6 @@ export function Segmented<T extends string | number>({
               {option}
               {suffix}
             </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-/** Wrapping chips; any number can be picked. */
-export function Chips({
-  options,
-  value,
-  tint,
-  onToggle,
-}: {
-  options: string[];
-  value: string[];
-  tint: Tint;
-  onToggle: (option: string) => void;
-}) {
-  return (
-    <View style={styles.chips}>
-      {options.map((option) => {
-        const on = value.includes(option);
-        return (
-          <Pressable
-            key={option}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: on }}
-            onPress={() => onToggle(option)}
-            style={({ pressed }) => [
-              styles.chip,
-              on && { borderColor: tint.ink, backgroundColor: tint.wash },
-              pressed && styles.pressed,
-            ]}>
-            <Text style={[styles.chipLabel, on && { color: tint.shade }]}>{option}</Text>
           </Pressable>
         );
       })}
@@ -454,24 +422,6 @@ const styles = StyleSheet.create({
     boxShadow: '0 2px 6px -2px rgba(30, 40, 80, 0.18)',
   },
   segmentLabel: {
-    fontFamily: fonts.bodyExtraBold,
-    fontSize: 14,
-    color: colors.textMuted,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  chipLabel: {
     fontFamily: fonts.bodyExtraBold,
     fontSize: 14,
     color: colors.textMuted,

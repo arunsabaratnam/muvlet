@@ -16,6 +16,8 @@ export type StepId =
   | 'experience'
   | 'days'
   | 'place'
+  | 'kit'
+  | 'minutes'
   | 'about'
   | 'limits'
   | 'build'
@@ -26,7 +28,7 @@ export type StepId =
 
 type Step = {
   coach: CoachName;
-  /** Where Continue goes; null finishes onboarding. */
+  /** Where Continue goes, unless the step sends some answers elsewhere; null finishes. */
   next: StepId | null;
   /** The coach's bubble. Questions only: no subtext, except the allowed `note`. */
   question?: string;
@@ -46,7 +48,10 @@ export const STEPS: Record<StepId, Step> = {
     bar: true,
   },
   days: { coach: 'rex', next: 'place', question: 'Which days can you train?', bar: true },
-  place: { coach: 'axel', next: 'about', question: 'Where will you work out?', bar: true },
+  // A gym goes straight to minutes: it has the lot, so there's nothing to ask about kit.
+  place: { coach: 'axel', next: 'kit', question: 'Where will you work out?', bar: true },
+  kit: { coach: 'axel', next: 'minutes', question: "What's at home?", bar: true },
+  minutes: { coach: 'axel', next: 'about', question: 'How long can you train?', bar: true },
   about: {
     coach: 'sage',
     next: 'limits',
@@ -69,7 +74,16 @@ export const STEPS: Record<StepId, Step> = {
   reminders: { coach: 'luna', next: null, question: 'How should I nudge you?' },
 };
 
-export const QUESTIONS: StepId[] = ['goal', 'experience', 'days', 'place', 'about', 'limits'];
+export const QUESTIONS: StepId[] = [
+  'goal',
+  'experience',
+  'days',
+  'place',
+  'kit',
+  'minutes',
+  'about',
+  'limits',
+];
 
 export function isStep(id: string | undefined): id is StepId {
   return !!id && id in STEPS;
@@ -81,9 +95,8 @@ export function progress(id: StepId) {
   return question < 0 ? 1 : (question + 1) / (QUESTIONS.length + 1);
 }
 
-/** Moves on from a step: to the next one, or out to Today with no way back. */
-export function goOn(from: StepId) {
-  const next = STEPS[from].next;
+/** Moves on from a step: to the next one (or `next`), or out to Today with no way back. */
+export function goOn(from: StepId, next = STEPS[from].next) {
   if (next) router.push(`/onboarding/${next}`);
   else router.replace('/today');
 }

@@ -14,7 +14,9 @@ import {
   ExperienceStep,
   GoalStep,
   IntroStep,
+  KitStep,
   LimitsStep,
+  MinutesStep,
   PlaceStep,
 } from './questions';
 import { RemindersStep } from './reminders-step';
@@ -49,6 +51,8 @@ async function start(step = 'intro') {
       'onboarding/experience': ExperienceStep,
       'onboarding/days': DaysStep,
       'onboarding/place': PlaceStep,
+      'onboarding/kit': KitStep,
+      'onboarding/minutes': MinutesStep,
       'onboarding/about': AboutStep,
       'onboarding/limits': LimitsStep,
       'onboarding/build': BuildStep,
@@ -75,6 +79,8 @@ async function answerEverything() {
   await pressContinue();
   await fireEvent.press(screen.getByText('Never lifted'));
   await pressContinue();
+  await pressContinue();
+  await fireEvent.press(screen.getByText('At a gym'));
   await pressContinue();
   await pressContinue();
   await fireEvent.press(screen.getByText('Female'));
@@ -119,15 +125,85 @@ test('the day picker asks for 2 to 5 days', async () => {
   expect(app.pathname()).toBe('/onboarding/place');
 });
 
-test('where you train picks the equipment you likely have', async () => {
-  await start('place');
-  expect(isChecked('Barbell')).toBe(true);
-  expect(isChecked('Just my body')).toBe(false);
+test('a gym has the lot, so it skips straight to how long', async () => {
+  const app = await start('place');
+  await pressContinue();
+  expect(app.pathname()).toBe('/onboarding/place');
 
-  await fireEvent.press(screen.getByText('Home'));
-  expect(isChecked('Barbell')).toBe(false);
-  expect(isChecked('Dumbbells')).toBe(true);
-  expect(isChecked('Just my body')).toBe(true);
+  await fireEvent.press(screen.getByText('At a gym'));
+  await pressContinue();
+  expect(app.pathname()).toBe('/onboarding/minutes');
+  expect(screen.getByText('How long can you train?')).toBeOnTheScreen();
+  await pressContinue();
+  expect(app.pathname()).toBe('/onboarding/about');
+});
+
+test("home asks what's there, and just my body clears the rest", async () => {
+  const app = await start('place');
+  await fireEvent.press(screen.getByText('A bit of both'));
+  await pressContinue();
+  expect(app.pathname()).toBe('/onboarding/kit');
+  expect(screen.getByText("What's at home?")).toBeOnTheScreen();
+  // Nothing is ticked for you.
+  await pressContinue();
+  expect(app.pathname()).toBe('/onboarding/kit');
+
+  await fireEvent.press(screen.getByText('Dumbbells'));
+  await fireEvent.press(screen.getByText('Bands'));
+  await fireEvent.press(screen.getByText('Nothing, just my body'));
+  expect(isChecked('Nothing, just my body')).toBe(true);
+  expect(isChecked('Dumbbells')).toBe(false);
+  expect(isChecked('Bands')).toBe(false);
+
+  await fireEvent.press(screen.getByText('Pull-up bar'));
+  expect(isChecked('Nothing, just my body')).toBe(false);
+  await pressContinue();
+  expect(app.pathname()).toBe('/onboarding/minutes');
+});
+
+test('more kit is found by group or search, or typed in', async () => {
+  await start('kit');
+  await fireEvent.press(screen.getByText('More kit'));
+  expect(screen.getByText('Machines and racks')).toBeOnTheScreen();
+  await fireEvent.press(screen.getByText('Medicine ball'));
+  expect(isChecked('Medicine ball')).toBe(true);
+  // What you've ticked shows at the top, and can be taken off there.
+  expect(screen.getByRole('button', { name: 'Remove Medicine ball' })).toBeOnTheScreen();
+
+  // Searching finds the tiles too, so nothing is added twice.
+  await fireEvent.changeText(screen.getByLabelText('Search kit'), 'bench');
+  // The tile behind the finder, and the search result.
+  expect(screen.getAllByRole('checkbox', { name: 'Bench' })).toHaveLength(2);
+  expect(screen.queryByText(/Add “/)).not.toBeOnTheScreen();
+
+  // A near match offers it, with adding your own as the quiet choice.
+  await fireEvent.changeText(screen.getByLabelText('Search kit'), 'roller');
+  expect(screen.getByRole('checkbox', { name: 'Foam roller' })).toBeOnTheScreen();
+  expect(screen.getByText('Not it? Add “Roller” as your own')).toBeOnTheScreen();
+
+  await fireEvent.changeText(screen.getByLabelText('Search kit'), 'punching bag');
+  await fireEvent.press(screen.getByText('Add “Punching bag”'));
+  expect(screen.getByRole('button', { name: 'Remove Punching bag' })).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Done'));
+  expect(screen.queryByLabelText('Search kit')).not.toBeOnTheScreen();
+  // The More kit tile counts the extras, and they're listed under the tiles.
+  expect(screen.getByText('2')).toBeOnTheScreen();
+  expect(screen.getByText('Medicine ball')).toBeOnTheScreen();
+  expect(screen.getByText('Punching bag')).toBeOnTheScreen();
+});
+
+test('going back to the same place keeps the kit ticked', async () => {
+  const app = await start('place');
+  await fireEvent.press(screen.getByText('At home'));
+  await pressContinue();
+  await fireEvent.press(screen.getByText('Bench'));
+  await act(async () => fireEvent.press(screen.getAllByRole('button', { name: 'Back' }).at(-1)!));
+  expect(app.pathname()).toBe('/onboarding/place');
+
+  await fireEvent.press(screen.getByText('At home'));
+  await pressContinue();
+  expect(isChecked('Bench')).toBe(true);
 });
 
 test('About you needs Male or Female to continue, but can be skipped', async () => {
