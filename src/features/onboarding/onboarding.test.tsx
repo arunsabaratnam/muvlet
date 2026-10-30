@@ -1,6 +1,9 @@
 import { router, Stack } from 'expo-router';
 import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
 import { Text } from 'react-native';
+import { State } from 'react-native-gesture-handler';
+import 'react-native-gesture-handler/jestSetup';
+import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 import * as Reanimated from 'react-native-reanimated';
 
 import OnboardingLayout from './onboarding-layout';
@@ -186,6 +189,39 @@ test('height switches between ft and cm, weight between lb and kg, each on its o
   await fireEvent.press(screen.getByText('Done'));
   expect(screen.getByRole('button', { name: 'Weight, 77 kg' })).toBeOnTheScreen();
   expect(screen.getByRole('button', { name: 'Height, 175 cm' })).toBeOnTheScreen();
+});
+
+// Drags the sheet by its grabber. A close it causes lands a moment later, so check with waitFor.
+function dragSheet(down: number, velocity: number) {
+  fireGestureHandler(getByGestureTestId('sheet-drag'), [
+    { state: State.BEGAN, translationY: 0 },
+    { state: State.ACTIVE, translationY: down / 2 },
+    { state: State.ACTIVE, translationY: down },
+    { state: State.END, translationY: down, velocityY: velocity },
+  ]);
+}
+
+const sheetCloses = () =>
+  waitFor(() => expect(screen.queryByText('Your weight')).not.toBeOnTheScreen(), {
+    timeout: 300,
+  });
+
+test('dragging the sheet down closes it', async () => {
+  await start('about');
+  await fireEvent.press(screen.getByRole('button', { name: 'Weight, 170 lb' }));
+  expect(screen.getByText('Your weight')).toBeOnTheScreen();
+
+  dragSheet(300, 1200);
+  await sheetCloses();
+  expect(screen.getByRole('button', { name: 'Weight, 170 lb' })).toBeOnTheScreen();
+});
+
+test('a small, slow drag lets the sheet spring back', async () => {
+  await start('about');
+  await fireEvent.press(screen.getByRole('button', { name: 'Weight, 170 lb' }));
+  dragSheet(40, 100);
+  await expect(sheetCloses()).rejects.toThrow();
+  expect(screen.getByText('Your weight')).toBeOnTheScreen();
 });
 
 test('the age sheet has no units switch', async () => {

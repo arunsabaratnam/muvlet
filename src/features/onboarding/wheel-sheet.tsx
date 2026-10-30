@@ -9,9 +9,19 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
-import Animated, { Easing, SlideInDown, useReducedMotion } from 'react-native-reanimated';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  Easing,
+  SlideInDown,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { Button } from '@/components/ui';
 import { colors, fonts } from '@/constants/theme';
@@ -26,18 +36,7 @@ export const WHEEL_ROW = 48;
 const VISIBLE = 5;
 const PAD = WHEEL_ROW * Math.floor(VISIBLE / 2);
 
-export function WheelSheet({
-  visible,
-  title,
-  label,
-  options,
-  index,
-  tint,
-  header,
-  onChange,
-  onClose,
-}: {
-  visible: boolean;
+type SheetProps = {
   title: string;
   /** What the wheel picks, for screen readers, e.g. "Weight". */
   label: string;
@@ -48,9 +47,10 @@ export function WheelSheet({
   header?: ReactNode;
   onChange: (index: number) => void;
   onClose: () => void;
-}) {
+};
+
+export function WheelSheet({ visible, ...sheet }: SheetProps & { visible: boolean }) {
   const reduceMotion = useReducedMotion();
-  const insets = useSafeAreaInsets();
   return (
     <Modal
       transparent
@@ -58,29 +58,88 @@ export function WheelSheet({
       animationType={reduceMotion ? 'none' : 'fade'}
       statusBarTranslucent
       navigationBarTranslucent
-      onRequestClose={onClose}>
-      <View style={styles.screen}>
+      onRequestClose={sheet.onClose}>
+      {/* Gestures inside a Modal need their own root on Android. */}
+      <GestureHandlerRootView style={styles.screen}>
+        <Sheet {...sheet} />
+      </GestureHandlerRootView>
+    </Modal>
+  );
+}
+
+// A drag past this share of the sheet, or a quick flick down, closes it.
+const CLOSE_SHARE = 1 / 3;
+const CLOSE_MIN = 80;
+const CLOSE_VELOCITY = 800;
+
+// Mounted fresh each time the sheet opens, so a sheet dragged shut comes back in place.
+function Sheet({ title, label, options, index, tint, header, onChange, onClose }: SheetProps) {
+  const reduceMotion = useReducedMotion();
+  const insets = useSafeAreaInsets();
+  const dragY = useSharedValue(0);
+  const height = useSharedValue(0);
+
+  // Pulling the grabber or title down drags the sheet; the wheel keeps its own scrolling.
+  const drag = Gesture.Pan()
+    .withTestId('sheet-drag')
+    .activeOffsetY([-8, 8])
+    .failOffsetX([-16, 16])
+    .onUpdate((event) => {
+      // Down follows the finger; up is held back.
+      dragY.value = event.translationY > 0 ? event.translationY : event.translationY / 3;
+    })
+    .onEnd((event) => {
+      const far = dragY.value > Math.max(height.value * CLOSE_SHARE, CLOSE_MIN);
+      if (!far && event.velocityY < CLOSE_VELOCITY) {
+        dragY.value = withSpring(0, { damping: 20, stiffness: 240 });
+      } else if (reduceMotion) {
+        scheduleOnRN(onClose);
+      } else {
+        dragY.value = withTiming(height.value + insets.bottom, { duration: 200 }, (finished) => {
+          if (finished) scheduleOnRN(onClose);
+        });
+      }
+    });
+
+  const sheetStyle = useAnimatedStyle(() => ({ transform: [{ translateY: dragY.value }] }));
+  // The backdrop fades out as the sheet goes down.
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: height.value ? 1 - Math.min(Math.max(dragY.value, 0) / height.value, 1) : 1,
+  }));
+
+  return (
+    <>
+      <Animated.View style={[styles.backdrop, backdropStyle]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close"
           onPress={onClose}
-          style={styles.backdrop}
+          style={styles.fill}
         />
+      </Animated.View>
+      <Animated.View
+        entering={
+          reduceMotion
+            ? undefined
+            : SlideInDown.duration(380).easing(Easing.bezier(0.22, 1, 0.36, 1))
+        }>
         <Animated.View
           accessibilityViewIsModal
-          entering={
-            reduceMotion
-              ? undefined
-              : SlideInDown.duration(380).easing(Easing.bezier(0.22, 1, 0.36, 1))
-          }
-          style={[styles.sheet, { paddingBottom: 34 + insets.bottom }]}>
-          <View style={styles.grabber} />
-          <View style={styles.header}>
-            <Text accessibilityRole="header" style={styles.title}>
-              {title}
-            </Text>
-            {header}
-          </View>
+          onLayout={(event) => {
+            height.value = event.nativeEvent.layout.height;
+          }}
+          style={[styles.sheet, { paddingBottom: 34 + insets.bottom }, sheetStyle]}>
+          <GestureDetector gesture={drag}>
+            <View style={styles.handle}>
+              <View style={styles.grabber} />
+              <View style={styles.header}>
+                <Text accessibilityRole="header" style={styles.title}>
+                  {title}
+                </Text>
+                {header}
+              </View>
+            </View>
+          </GestureDetector>
           <Wheel
             // A fresh wheel for each list (another picker, or the units switched), so it
             // starts on the current value.
@@ -93,8 +152,8 @@ export function WheelSheet({
           />
           <Button title="Done" color={tint} onPress={onClose} />
         </Animated.View>
-      </View>
-    </Modal>
+      </Animated.View>
+    </>
   );
 }
 
@@ -215,13 +274,20 @@ const styles = StyleSheet.create({
     inset: 0,
     backgroundColor: 'rgba(30, 42, 58, 0.45)',
   },
+  fill: {
+    flex: 1,
+  },
   sheet: {
     gap: 16,
-    paddingTop: 10,
     paddingHorizontal: 24,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     backgroundColor: colors.surface,
+  },
+  // The drag area: the grabber and the title row, the full width of the sheet.
+  handle: {
+    gap: 16,
+    paddingTop: 10,
   },
   grabber: {
     alignSelf: 'center',
