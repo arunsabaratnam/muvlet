@@ -2,23 +2,16 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import {
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
-  type FlatList,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
-import Animated, {
-  Easing,
-  SlideInDown,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  type SharedValue,
-} from 'react-native-reanimated';
+import Animated, { Easing, SlideInDown, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { Button } from '@/components/ui';
 import { colors, fonts } from '@/constants/theme';
@@ -118,21 +111,17 @@ function Wheel({
   tint: Tint;
   onChange: (index: number) => void;
 }) {
-  const list = useRef<FlatList<string>>(null);
-  const scrollY = useSharedValue(index * WHEEL_ROW);
+  const scroller = useRef<ScrollView>(null);
   // The row the wheel is resting on, so a pick from outside (a row tap, a screen
   // reader) scrolls it there, but one the wheel settled on itself doesn't.
   const resting = useRef(index);
+  const placed = useRef(false);
 
   useEffect(() => {
     if (index === resting.current) return;
     resting.current = index;
-    list.current?.scrollToOffset({ offset: index * WHEEL_ROW, animated: true });
+    scroller.current?.scrollTo({ y: index * WHEEL_ROW, animated: true });
   }, [index]);
-
-  const onScroll = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
-  });
 
   const settle = (y: number) => {
     const next = Math.min(options.length - 1, Math.max(0, Math.round(y / WHEEL_ROW)));
@@ -167,56 +156,52 @@ function Wheel({
         pointerEvents="none"
         style={[styles.band, { backgroundColor: tint.wash, borderColor: tint.ink }]}
       />
-      <Animated.FlatList
-        ref={list}
+      {/* A plain scroller with every row, and nothing that runs while it moves, so it glides. */}
+      <ScrollView
+        ref={scroller}
         testID="wheel"
-        data={options}
-        keyExtractor={(option) => option}
-        renderItem={({ item, index: row }) => (
-          <WheelRow
-            label={item}
-            row={row}
-            scrollY={scrollY}
-            onPress={() => row !== index && onChange(row)}
-          />
-        )}
-        getItemLayout={(_, row) => ({ length: WHEEL_ROW, offset: WHEEL_ROW * row, index: row })}
-        initialScrollIndex={index}
+        contentOffset={{ x: 0, y: index * WHEEL_ROW }}
+        // In case contentOffset is ignored (some Android versions), place it once it's laid out.
+        onContentSizeChange={() => {
+          if (placed.current) return;
+          placed.current = true;
+          scroller.current?.scrollTo({ y: resting.current * WHEEL_ROW, animated: false });
+        }}
         contentContainerStyle={styles.wheelContent}
         snapToInterval={WHEEL_ROW}
-        decelerationRate="fast"
+        decelerationRate="normal"
         showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onScroll={onScroll}
         onMomentumScrollEnd={onMomentumScrollEnd}
-        onScrollEndDrag={onScrollEndDrag}
-      />
+        onScrollEndDrag={onScrollEndDrag}>
+        {options.map((option, row) => (
+          <Pressable key={option} onPress={() => row !== index && onChange(row)} style={styles.row}>
+            <Text numberOfLines={1} style={styles.rowLabel}>
+              {option}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+      <Fade edge="top" />
+      <Fade edge="bottom" />
     </View>
   );
 }
 
-function WheelRow({
-  label,
-  row,
-  scrollY,
-  onPress,
-}: {
-  label: string;
-  row: number;
-  scrollY: SharedValue<number>;
-  onPress: () => void;
-}) {
-  // Rows shrink and fade the further they sit from the middle.
-  const style = useAnimatedStyle(() => {
-    const away = Math.min(Math.abs(scrollY.value / WHEEL_ROW - row), 3);
-    return { opacity: 1 - away * 0.3, transform: [{ scale: 1 - away * 0.12 }] };
-  });
+/** Fades the rows out towards the top or bottom edge of the wheel. */
+function Fade({ edge }: { edge: 'top' | 'bottom' }) {
+  const id = `wheel-fade-${edge}`;
   return (
-    <Pressable onPress={onPress} style={styles.row}>
-      <Animated.Text numberOfLines={1} style={[styles.rowLabel, style]}>
-        {label}
-      </Animated.Text>
-    </Pressable>
+    <View pointerEvents="none" style={[styles.fade, edge === 'top' ? styles.top : styles.bottom]}>
+      <Svg width="100%" height="100%">
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={colors.surface} stopOpacity={edge === 'top' ? 1 : 0} />
+            <Stop offset="1" stopColor={colors.surface} stopOpacity={edge === 'top' ? 0 : 1} />
+          </LinearGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill={`url(#${id})`} />
+      </Svg>
+    </View>
   );
 }
 
@@ -271,6 +256,18 @@ const styles = StyleSheet.create({
   },
   wheelContent: {
     paddingVertical: PAD,
+  },
+  fade: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: PAD,
+  },
+  top: {
+    top: 0,
+  },
+  bottom: {
+    bottom: 0,
   },
   row: {
     height: WHEEL_ROW,

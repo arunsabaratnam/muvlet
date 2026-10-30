@@ -24,7 +24,6 @@ import {
   type Answers,
   type Experience,
   type Goal,
-  type Units,
   type WheelOptions,
 } from './answers';
 import {
@@ -288,16 +287,26 @@ export function PlaceStep() {
 
 // The three numbers on About you, each picked on a wheel in a sheet.
 const PICKERS = {
-  height: { label: 'Height', title: 'Your height', field: 'heightCm', options: heightOptions },
-  weight: { label: 'Weight', title: 'Your weight', field: 'weightKg', options: weightOptions },
-  age: { label: 'Age', title: 'Your age', field: 'age', options: ageOptions },
+  height: {
+    label: 'Height',
+    title: 'Your height',
+    field: 'heightCm',
+    options: (answers: Answers) => heightOptions(answers.heightUnits),
+  },
+  weight: {
+    label: 'Weight',
+    title: 'Your weight',
+    field: 'weightKg',
+    options: (answers: Answers) => weightOptions(answers.weightUnits),
+  },
+  age: { label: 'Age', title: 'Your age', field: 'age', options: () => ageOptions() },
 } satisfies Record<
   string,
   {
     label: string;
     title: string;
     field: keyof Answers;
-    options: (units: Units) => WheelOptions;
+    options: (answers: Answers) => WheelOptions;
   }
 >;
 type Picker = keyof typeof PICKERS;
@@ -306,25 +315,15 @@ export function AboutStep() {
   const { answers, update } = useAnswers();
   const play = usePlayCoach();
   const tint = tintOf('about');
-  const { units } = answers;
   // The sheet keeps its last picker while it fades out.
   const [sheet, setSheet] = useState<{ picker: Picker; open: boolean }>({
     picker: 'height',
     open: false,
   });
 
-  const unitsSwitch = (
-    <Segmented
-      options={['lb', 'kg'] as const}
-      value={units}
-      tint={tint}
-      onChange={(next) => update({ units: next })}
-    />
-  );
-
   const rowOf = (picker: Picker) => {
     const { field, options } = PICKERS[picker];
-    const { labels, values } = options(units);
+    const { labels, values } = options(answers);
     return { labels, values, index: nearestRow(values, answers[field]) };
   };
   const shown = PICKERS[sheet.picker];
@@ -341,7 +340,6 @@ export function AboutStep() {
             onPress={() => update({ skippedAbout: false })}
           />
         }>
-        <Section>{unitsSwitch}</Section>
         <Section label="Calculate calories as">
           <Segmented
             options={['Male', 'Female'] as const}
@@ -374,9 +372,7 @@ export function AboutStep() {
         options={wheel.labels}
         index={wheel.index}
         tint={tint}
-        header={
-          sheet.picker === 'age' ? undefined : <View style={styles.sheetUnits}>{unitsSwitch}</View>
-        }
+        header={<SheetUnits picker={sheet.picker} />}
         onChange={(index) => {
           update({ [shown.field]: wheel.values[index] });
           play('nod');
@@ -384,6 +380,32 @@ export function AboutStep() {
         onClose={() => setSheet({ ...sheet, open: false })}
       />
     </>
+  );
+}
+
+/** The units switch in a sheet: feet or cm for height, lb or kg for weight, none for age. */
+function SheetUnits({ picker }: { picker: Picker }) {
+  const { answers, update } = useAnswers();
+  const tint = tintOf('about');
+  if (picker === 'age') return null;
+  return (
+    <View style={styles.sheetUnits}>
+      {picker === 'height' ? (
+        <Segmented
+          options={['ft', 'cm'] as const}
+          value={answers.heightUnits}
+          tint={tint}
+          onChange={(heightUnits) => update({ heightUnits })}
+        />
+      ) : (
+        <Segmented
+          options={['lb', 'kg'] as const}
+          value={answers.weightUnits}
+          tint={tint}
+          onChange={(weightUnits) => update({ weightUnits })}
+        />
+      )}
+    </View>
   );
 }
 

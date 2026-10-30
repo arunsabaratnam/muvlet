@@ -140,8 +140,10 @@ test('About you needs Male or Female to continue, but can be skipped', async () 
   expect(app.pathname()).toBe('/onboarding/limits');
 });
 
-test('height, weight and age are picked on a wheel, in the units picked', async () => {
+test('height, weight and age are picked on a wheel in a sheet', async () => {
   await start('about');
+  // Units live in the sheets now, not on the screen.
+  expect(screen.queryByText('kg')).not.toBeOnTheScreen();
   expect(screen.getByRole('button', { name: 'Height, 5′ 9″' })).toBeOnTheScreen();
 
   await fireEvent.press(screen.getByRole('button', { name: 'Weight, 170 lb' }));
@@ -152,10 +154,6 @@ test('height, weight and age are picked on a wheel, in the units picked', async 
   await fireEvent.press(screen.getByText('Done'));
   expect(screen.queryByText('Your weight')).not.toBeOnTheScreen();
   expect(screen.getByRole('button', { name: 'Weight, 171 lb' })).toBeOnTheScreen();
-
-  await fireEvent.press(screen.getByText('kg'));
-  expect(screen.getByRole('button', { name: 'Weight, 78 kg' })).toBeOnTheScreen();
-  expect(screen.getByRole('button', { name: 'Height, 175 cm' })).toBeOnTheScreen();
 });
 
 test('a flick of the wheel picks the row it stops on', async () => {
@@ -169,16 +167,34 @@ test('a flick of the wheel picks the row it stops on', async () => {
   expect(screen.getByRole('button', { name: 'Age, 35' })).toBeOnTheScreen();
 });
 
-test('the units switch in the sheet changes the rows too', async () => {
+test('height switches between ft and cm, weight between lb and kg, each on its own', async () => {
   await start('about');
+
   await fireEvent.press(screen.getByRole('button', { name: 'Height, 5′ 9″' }));
-  // The screen's switch sits under the sheet, so the sheet's is the last one.
-  await fireEvent.press(screen.getAllByText('kg').at(-1)!);
+  expect(screen.queryByText('lb')).not.toBeOnTheScreen();
+  await fireEvent.press(screen.getByText('cm'));
   expect(screen.getByRole('adjustable', { name: 'Height' })).toHaveAccessibilityValue({
     text: '175 cm',
   });
   await fireEvent.press(screen.getByText('Done'));
+  expect(screen.getByRole('button', { name: 'Height, 175 cm' })).toBeOnTheScreen();
+  expect(screen.getByRole('button', { name: 'Weight, 170 lb' })).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByRole('button', { name: 'Weight, 170 lb' }));
+  expect(screen.queryByText('cm')).not.toBeOnTheScreen();
+  await fireEvent.press(screen.getByText('kg'));
+  await fireEvent.press(screen.getByText('Done'));
   expect(screen.getByRole('button', { name: 'Weight, 77 kg' })).toBeOnTheScreen();
+  expect(screen.getByRole('button', { name: 'Height, 175 cm' })).toBeOnTheScreen();
+});
+
+test('the age sheet has no units switch', async () => {
+  await start('about');
+  await fireEvent.press(screen.getByRole('button', { name: 'Age, 28' }));
+  expect(screen.getByText('Your age')).toBeOnTheScreen();
+  for (const unit of ['ft', 'cm', 'lb', 'kg']) {
+    expect(screen.queryByText(unit)).not.toBeOnTheScreen();
+  }
 });
 
 test('the whole flow ends on Today, with no way back into it', async () => {

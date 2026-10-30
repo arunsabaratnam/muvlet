@@ -13,7 +13,8 @@ export type Goal =
 export type Experience = 'Never lifted' | 'Tried it a few times' | 'Used to train, not lately';
 export type TimeOfDay = 'Morning' | 'Lunch' | 'Evening';
 export type Place = 'Gym' | 'Home' | 'Both';
-export type Units = 'lb' | 'kg';
+export type HeightUnits = 'ft' | 'cm';
+export type WeightUnits = 'lb' | 'kg';
 export type Sex = 'Male' | 'Female';
 export type Reminders = 'Gentle' | 'Regular' | 'Off';
 
@@ -26,7 +27,8 @@ export type Answers = {
   place: Place;
   equipment: string[];
   minutes: number;
-  units: Units;
+  heightUnits: HeightUnits;
+  weightUnits: WeightUnits;
   sex: Sex | null;
   heightCm: number;
   weightKg: number;
@@ -55,7 +57,8 @@ export const DEFAULT_ANSWERS: Answers = {
   place: 'Gym',
   equipment: KITS.Gym,
   minutes: 45,
-  units: 'lb',
+  heightUnits: 'ft',
+  weightUnits: 'lb',
   sex: null,
   heightCm: 175,
   weightKg: 170 * KG_PER_LB,
@@ -77,14 +80,14 @@ export function toggle(list: string[], item: string, only?: string): string[] {
   return next.length || !only ? next : [only];
 }
 
-/** Height as the user reads it: feet and inches with lb, centimetres with kg. */
-export function formatHeight(cm: number, units: Units) {
-  if (units === 'kg') return `${Math.round(cm)} cm`;
+/** Height as the user reads it: feet and inches, or centimetres. */
+export function formatHeight(cm: number, units: HeightUnits) {
+  if (units === 'cm') return `${Math.round(cm)} cm`;
   const inches = Math.round(cm / 2.54);
   return `${Math.floor(inches / 12)}′ ${inches % 12}″`;
 }
 
-export function formatWeight(kg: number, units: Units) {
+export function formatWeight(kg: number, units: WeightUnits) {
   return units === 'kg' ? `${Math.round(kg)} kg` : `${Math.round(kg / KG_PER_LB)} lb`;
 }
 
@@ -95,14 +98,14 @@ function range(from: number, to: number) {
   return Array.from({ length: to - from + 1 }, (_, i) => from + i);
 }
 
-/** Inch by inch with lb (4′ 4″ to 7′ 2″), centimetre by centimetre with kg. Stored in cm. */
-export function heightOptions(units: Units): WheelOptions {
-  const values = units === 'lb' ? range(52, 86).map((inches) => inches * 2.54) : range(130, 220);
+/** Inch by inch (4′ 4″ to 7′ 2″) or centimetre by centimetre. Stored in cm. */
+export function heightOptions(units: HeightUnits): WheelOptions {
+  const values = units === 'ft' ? range(52, 86).map((inches) => inches * 2.54) : range(130, 220);
   return { values, labels: values.map((cm) => formatHeight(cm, units)) };
 }
 
 /** Pound by pound with lb, kilogram by kilogram with kg. Stored in kg. */
-export function weightOptions(units: Units): WheelOptions {
+export function weightOptions(units: WeightUnits): WheelOptions {
   const values = units === 'lb' ? range(80, 400).map((lb) => lb * KG_PER_LB) : range(36, 181);
   return { values, labels: values.map((kg) => formatWeight(kg, units)) };
 }
