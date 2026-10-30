@@ -170,6 +170,25 @@ test('a flick of the wheel picks the row it stops on', async () => {
   expect(screen.getByRole('button', { name: 'Age, 35' })).toBeOnTheScreen();
 });
 
+test('tapping a value on the wheel picks it', async () => {
+  await start('about');
+  await fireEvent.press(screen.getByRole('button', { name: 'Age, 28' }));
+  // Rows run from 13, so a tap inside the 22nd row is 35.
+  await fireEvent.press(screen.getByTestId('wheel-rows'), {
+    nativeEvent: { locationY: WHEEL_ROW * 22 + 10 },
+  });
+  await fireEvent.press(screen.getByText('Done'));
+  expect(screen.getByRole('button', { name: 'Age, 35' })).toBeOnTheScreen();
+});
+
+test('the sheet opens with the rows near the value, then fills in the rest', async () => {
+  await start('about');
+  await fireEvent.press(screen.getByRole('button', { name: 'Weight, 170 lb' }));
+  expect(screen.getByText('165 lb')).toBeOnTheScreen();
+  expect(screen.queryByText('80 lb')).not.toBeOnTheScreen();
+  await waitFor(() => expect(screen.getByText('80 lb')).toBeOnTheScreen());
+});
+
 test('height switches between ft and cm, weight between lb and kg, each on its own', async () => {
   await start('about');
 

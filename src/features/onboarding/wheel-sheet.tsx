@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Modal,
   Pressable,
@@ -12,6 +12,7 @@ import {
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
+  FadeIn,
   SlideInDown,
   useAnimatedStyle,
   useReducedMotion,
@@ -35,6 +36,8 @@ export const WHEEL_ROW = 48;
 // Rows showing at once; the middle one is the pick.
 const VISIBLE = 5;
 const PAD = WHEEL_ROW * Math.floor(VISIBLE / 2);
+// Rows either side of the value drawn on the first frame.
+const NEAR = 10;
 
 type SheetProps = {
   title: string;
@@ -50,12 +53,12 @@ type SheetProps = {
 };
 
 export function WheelSheet({ visible, ...sheet }: SheetProps & { visible: boolean }) {
-  const reduceMotion = useReducedMotion();
   return (
     <Modal
       transparent
       visible={visible}
-      animationType={reduceMotion ? 'none' : 'fade'}
+      // The sheet does its own quick slide and fade, so nothing native stacks on top.
+      animationType="none"
       statusBarTranslucent
       navigationBarTranslucent
       onRequestClose={sheet.onClose}>
@@ -72,6 +75,12 @@ const CLOSE_SHARE = 1 / 3;
 const CLOSE_MIN = 80;
 const CLOSE_VELOCITY = 800;
 
+// Timings from the platforms' own sheets (React Navigation's TransitionSpecs): Material slides
+// a sheet in over 250 ms and out over 200 ms, and iOS settles with a spring that never overshoots.
+const SLIDE_IN = SlideInDown.duration(250).easing(Easing.out(Easing.cubic));
+const SLIDE_OUT = { duration: 200, easing: Easing.in(Easing.quad) };
+const SETTLE = { stiffness: 1000, damping: 500, mass: 3, overshootClamping: true };
+
 // Mounted fresh each time the sheet opens, so a sheet dragged shut comes back in place.
 function Sheet({ title, label, options, index, tint, header, onChange, onClose }: SheetProps) {
   const reduceMotion = useReducedMotion();
@@ -85,17 +94,17 @@ function Sheet({ title, label, options, index, tint, header, onChange, onClose }
     .activeOffsetY([-8, 8])
     .failOffsetX([-16, 16])
     .onUpdate((event) => {
-      // Down follows the finger; up is held back.
-      dragY.value = event.translationY > 0 ? event.translationY : event.translationY / 3;
+      // Down follows the finger; it never lifts above where it rests.
+      dragY.value = Math.max(0, event.translationY);
     })
     .onEnd((event) => {
       const far = dragY.value > Math.max(height.value * CLOSE_SHARE, CLOSE_MIN);
       if (!far && event.velocityY < CLOSE_VELOCITY) {
-        dragY.value = withSpring(0, { damping: 20, stiffness: 240 });
+        dragY.value = withSpring(0, SETTLE);
       } else if (reduceMotion) {
         scheduleOnRN(onClose);
       } else {
-        dragY.value = withTiming(height.value + insets.bottom, { duration: 200 }, (finished) => {
+        dragY.value = withTiming(height.value + insets.bottom, SLIDE_OUT, (finished) => {
           if (finished) scheduleOnRN(onClose);
         });
       }
@@ -109,20 +118,19 @@ function Sheet({ title, label, options, index, tint, header, onChange, onClose }
 
   return (
     <>
-      <Animated.View style={[styles.backdrop, backdropStyle]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          onPress={onClose}
-          style={styles.fill}
-        />
-      </Animated.View>
       <Animated.View
-        entering={
-          reduceMotion
-            ? undefined
-            : SlideInDown.duration(380).easing(Easing.bezier(0.22, 1, 0.36, 1))
-        }>
+        entering={reduceMotion ? undefined : FadeIn.duration(200)}
+        style={styles.backdrop}>
+        <Animated.View style={[styles.fill, styles.dim, backdropStyle]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            onPress={onClose}
+            style={styles.fill}
+          />
+        </Animated.View>
+      </Animated.View>
+      <Animated.View entering={reduceMotion ? undefined : SLIDE_IN}>
         <Animated.View
           accessibilityViewIsModal
           onLayout={(event) => {
@@ -175,6 +183,15 @@ function Wheel({
   // reader) scrolls it there, but one the wheel settled on itself doesn't.
   const resting = useRef(index);
   const placed = useRef(false);
+  // The first frame draws only the rows around the value, so the sheet opens at once; the rest
+  // fill in on the next frame. Spacers keep the full height, so nothing moves.
+  const [allRows, setAllRows] = useState(false);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setAllRows(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  const first = allRows ? 0 : Math.max(0, index - NEAR);
+  const last = allRows ? options.length : Math.min(options.length, index + NEAR + 1);
 
   useEffect(() => {
     if (index === resting.current) return;
@@ -232,13 +249,21 @@ function Wheel({
         showsVerticalScrollIndicator={false}
         onMomentumScrollEnd={onMomentumScrollEnd}
         onScrollEndDrag={onScrollEndDrag}>
-        {options.map((option, row) => (
-          <Pressable key={option} onPress={() => row !== index && onChange(row)} style={styles.row}>
-            <Text numberOfLines={1} style={styles.rowLabel}>
+        {/* One touchable for every row: a tap jumps to the row under the finger. */}
+        <Pressable
+          testID="wheel-rows"
+          onPress={(event) => {
+            const row = Math.floor(event.nativeEvent.locationY / WHEEL_ROW);
+            if (row >= 0 && row < options.length && row !== index) onChange(row);
+          }}>
+          <View style={{ height: first * WHEEL_ROW }} />
+          {options.slice(first, last).map((option) => (
+            <Text key={option} numberOfLines={1} style={styles.row}>
               {option}
             </Text>
-          </Pressable>
-        ))}
+          ))}
+          <View style={{ height: (options.length - last) * WHEEL_ROW }} />
+        </Pressable>
       </ScrollView>
       <Fade edge="top" />
       <Fade edge="bottom" />
@@ -272,6 +297,8 @@ const styles = StyleSheet.create({
   backdrop: {
     position: 'absolute',
     inset: 0,
+  },
+  dim: {
     backgroundColor: 'rgba(30, 42, 58, 0.45)',
   },
   fill: {
@@ -337,10 +364,9 @@ const styles = StyleSheet.create({
   },
   row: {
     height: WHEEL_ROW,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rowLabel: {
+    lineHeight: WHEEL_ROW,
+    textAlign: 'center',
+    textAlignVertical: 'center',
     fontFamily: fonts.headingHeavy,
     fontSize: 26,
     fontVariant: ['tabular-nums'],
