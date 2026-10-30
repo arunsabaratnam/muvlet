@@ -161,27 +161,36 @@ test("home asks what's there, and just my body clears the rest", async () => {
   expect(app.pathname()).toBe('/onboarding/minutes');
 });
 
-test('more kit comes from a longer list, or is typed in', async () => {
+test('more kit is found by group or search, or typed in', async () => {
   await start('kit');
   await fireEvent.press(screen.getByText('More kit'));
+  expect(screen.getByText('Machines and racks')).toBeOnTheScreen();
   await fireEvent.press(screen.getByText('Medicine ball'));
   expect(isChecked('Medicine ball')).toBe(true);
+  // What you've ticked shows at the top, and can be taken off there.
+  expect(screen.getByRole('button', { name: 'Remove Medicine ball' })).toBeOnTheScreen();
 
   // Searching finds the tiles too, so nothing is added twice.
   await fireEvent.changeText(screen.getByLabelText('Search kit'), 'bench');
-  expect(screen.queryByText(/^Add/)).not.toBeOnTheScreen();
+  // The tile behind the finder, and the search result.
+  expect(screen.getAllByRole('checkbox', { name: 'Bench' })).toHaveLength(2);
+  expect(screen.queryByText(/Add “/)).not.toBeOnTheScreen();
 
-  await fireEvent.changeText(screen.getByLabelText('Search kit'), 'yoga mat');
-  expect(screen.getByText('Nothing on our list matches that.')).toBeOnTheScreen();
-  await fireEvent.press(screen.getByText('Add “Yoga mat”'));
-  expect(isChecked('Yoga mat')).toBe(true);
+  // A near match offers it, with adding your own as the quiet choice.
+  await fireEvent.changeText(screen.getByLabelText('Search kit'), 'roller');
+  expect(screen.getByRole('checkbox', { name: 'Foam roller' })).toBeOnTheScreen();
+  expect(screen.getByText('Not it? Add “Roller” as your own')).toBeOnTheScreen();
+
+  await fireEvent.changeText(screen.getByLabelText('Search kit'), 'punching bag');
+  await fireEvent.press(screen.getByText('Add “Punching bag”'));
+  expect(screen.getByRole('button', { name: 'Remove Punching bag' })).toBeOnTheScreen();
 
   await fireEvent.press(screen.getByText('Done'));
   expect(screen.queryByLabelText('Search kit')).not.toBeOnTheScreen();
   // The More kit tile counts the extras, and they're listed under the tiles.
   expect(screen.getByText('2')).toBeOnTheScreen();
   expect(screen.getByText('Medicine ball')).toBeOnTheScreen();
-  expect(screen.getByText('Yoga mat')).toBeOnTheScreen();
+  expect(screen.getByText('Punching bag')).toBeOnTheScreen();
 });
 
 test('going back to the same place keeps the kit ticked', async () => {

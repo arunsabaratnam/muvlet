@@ -58,7 +58,7 @@ import {
   TreeIcon,
   type BodyArea,
 } from './icons';
-import { extrasIn, HOME_KIT, KitSheet, KitWell } from './kit';
+import { extrasIn, HOME_KIT, KitFinder, KitWell } from './kit';
 import { usePlayCoach } from './onboarding-layout';
 import { StepScreen } from './step-screen';
 import { GOAL_COACH, goOn, STEPS, type StepId } from './steps';
@@ -298,7 +298,7 @@ export function KitStep() {
   const { answers, update } = useAnswers();
   const play = usePlayCoach();
   const tint = tintOf('kit');
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [finderOpen, setFinderOpen] = useState(false);
   const extras = extrasIn(answers.equipment);
   const pick = (item: string) => {
     update({ equipment: toggle(answers.equipment, item, BODY_ONLY) });
@@ -340,7 +340,7 @@ export function KitStep() {
                   <PlusIcon color={extras.length ? tint.ink : colors.textMuted} />
                 </View>
               }
-              onPress={() => setSheetOpen(true)}
+              onPress={() => setFinderOpen(true)}
             />
           </TileGrid>
         </Section>
@@ -360,12 +360,12 @@ export function KitStep() {
           </View>
         ) : null}
       </StepScreen>
-      <KitSheet
-        visible={sheetOpen}
+      <KitFinder
+        visible={finderOpen}
         value={answers.equipment}
         tint={tint}
         onToggle={pick}
-        onClose={() => setSheetOpen(false)}
+        onClose={() => setFinderOpen(false)}
       />
     </>
   );

@@ -366,6 +366,168 @@ export function PlateIcon({ color, size = 20 }: IconProps) {
   );
 }
 
+export function EzBarIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={2} y={7} width={3.2} height={10} rx={1.6} fill={color} />
+      <Rect x={18.8} y={7} width={3.2} height={10} rx={1.6} fill={color} />
+      <Path
+        d="M5 12h2l2-2 2 4 2-4 2 4 2-2h2"
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+export function SandbagIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        d="M8 8V6.5a1.5 1.5 0 0 1 3 0V8M13 8V6.5a1.5 1.5 0 0 1 3 0V8"
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+      />
+      <Rect x={3} y={8} width={18} height={12} rx={5} fill={color} />
+    </Svg>
+  );
+}
+
+export function DipStationIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={4} y={8} width={2.6} height={13} rx={1} fill={color} />
+      <Rect x={17.4} y={8} width={2.6} height={13} rx={1} fill={color} />
+      <Rect x={2} y={7} width={8} height={2.6} rx={1.3} fill={color} />
+      <Rect x={14} y={7} width={8} height={2.6} rx={1.3} fill={color} />
+      <Rect x={2} y={19} width={20} height={2.4} rx={1.2} fill={color} />
+    </Svg>
+  );
+}
+
+export function RingsIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path d="M8 2v8M16 2v8" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <Circle cx={8} cy={15} r={4.5} fill="none" stroke={color} strokeWidth={2.6} />
+      <Circle cx={16} cy={15} r={4.5} fill="none" stroke={color} strokeWidth={2.6} />
+    </Svg>
+  );
+}
+
+export function ParallettesIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={2} y={9} width={8} height={2.6} rx={1.3} fill={color} />
+      <Rect x={14} y={9} width={8} height={2.6} rx={1.3} fill={color} />
+      <Path
+        d="M3.5 11.5L2.5 18M8.5 11.5l1 6.5M15.5 11.5l-1 6.5M20.5 11.5l1 6.5"
+        stroke={color}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+export function SmithMachineIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={3} y={2.5} width={2.6} height={17} rx={1} fill={color} />
+      <Rect x={18.4} y={2.5} width={2.6} height={17} rx={1} fill={color} />
+      <Rect x={1} y={10} width={22} height={2} rx={1} fill={color} />
+      <Rect x={6.6} y={7.5} width={2.4} height={7} rx={1.2} fill={color} />
+      <Rect x={15} y={7.5} width={2.4} height={7} rx={1.2} fill={color} />
+      <Rect x={1.5} y={19} width={21} height={2.5} rx={1.25} fill={color} />
+    </Svg>
+  );
+}
+
+export function LegPressIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={2} y={19} width={20} height={2.5} rx={1.25} fill={color} />
+      <Path d="M5 18L17 5" stroke={color} strokeWidth={2.6} strokeLinecap="round" />
+      <Path d="M13.5 3.5l6.5 6-2 2.2-6.5-6z" fill={color} />
+      <Rect x={3} y={13} width={7} height={3} rx={1.5} fill={color} />
+    </Svg>
+  );
+}
+
+export function TreadmillIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        d="M2.5 18.5h14l4.5-4M16.5 18.5V6.5h3"
+        fill="none"
+        stroke={color}
+        strokeWidth={2.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Rect x={2} y={19.5} width={15} height={2} rx={1} fill={color} />
+    </Svg>
+  );
+}
+
+export function RowerIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={2} y={17} width={20} height={2.6} rx={1.3} fill={color} />
+      <Circle cx={18} cy={11} r={4.5} fill={color} />
+      <Rect x={5} y={13.5} width={6} height={3} rx={1.5} fill={color} />
+      <Path d="M8 13.5L13 9" stroke={color} strokeWidth={2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+export function FoamRollerIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={2} y={7} width={20} height={10} rx={5} fill={color} />
+      <Path d="M8 7v10M12 7v10M16 7v10" stroke={colors.surface} strokeWidth={1.4} />
+    </Svg>
+  );
+}
+
+export function YogaMatIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={2} y={9} width={14} height={8} rx={2} fill={color} />
+      <Circle cx={17} cy={13} r={5} fill={color} />
+      <Circle cx={17} cy={13} r={2} fill={colors.surface} />
+    </Svg>
+  );
+}
+
+export function JumpRopeIcon({ color, size = 20 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Rect x={2} y={3} width={3.4} height={8} rx={1.7} fill={color} />
+      <Rect x={18.6} y={3} width={3.4} height={8} rx={1.7} fill={color} />
+      <Path
+        d="M3.7 11c0 9 16.6 9 16.6 0"
+        fill="none"
+        stroke={color}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+export function CloseIcon({ color, size = 10 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M6 6l12 12M18 6L6 18" stroke={color} strokeWidth={3.4} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 export function PlusIcon({ color, size = 20 }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
