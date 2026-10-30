@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Button } from '@/components/ui';
-import { coachColors } from '@/constants/theme';
+import { coachColors, colors } from '@/constants/theme';
 
 import {
   ageOptions,
@@ -27,15 +27,21 @@ import {
   type WheelOptions,
 } from './answers';
 import {
+  CheckRow,
   Chips,
   DayPicker,
   OptionRows,
   PickerRow,
   Section,
   Segmented,
+  Tile,
+  TileGrid,
   type Option,
 } from './controls';
 import {
+  BodyIcon,
+  CheckCircleIcon,
+  DotsIcon,
   DumbbellIcon,
   FlameIcon,
   HeartIcon,
@@ -43,6 +49,7 @@ import {
   SproutIcon,
   StarIcon,
   TreeIcon,
+  type BodyArea,
 } from './icons';
 import { usePlayCoach } from './onboarding-layout';
 import { StepScreen } from './step-screen';
@@ -409,22 +416,66 @@ function SheetUnits({ picker }: { picker: Picker }) {
   );
 }
 
-const LIMITS = ['Nothing', 'Knees', 'Lower back', 'Shoulders', 'Wrists', 'Neck', 'Hips'];
+const BODY_AREAS: BodyArea[] = [
+  'Knees',
+  'Lower back',
+  'Shoulders',
+  'Wrists',
+  'Neck',
+  'Hips',
+  'Elbows',
+  'Ankles',
+];
 
 export function LimitsStep() {
   const { answers, update } = useAnswers();
   const play = usePlayCoach();
+  const tint = tintOf('limits');
+  const pick = (item: string) => {
+    update({ limits: toggle(answers.limits, item, 'Nothing') });
+    play('nod');
+  };
+
+  // Most people have nothing to flag, so that's one tap; the grid fills the rest.
   return (
-    <StepScreen footer={<Continue step="limits" />}>
-      <Chips
-        options={LIMITS}
-        value={answers.limits}
-        tint={tintOf('limits')}
-        onToggle={(item) => {
-          update({ limits: toggle(answers.limits, item, 'Nothing') });
-          play('nod');
-        }}
+    <StepScreen footer={<Continue step="limits" disabled={!answers.limits.length} />}>
+      <CheckRow
+        label="I'm all good, nothing hurts"
+        icon={(color) => <CheckCircleIcon color={color} />}
+        on={answers.limits.includes('Nothing')}
+        tint={tint}
+        onPress={() => pick('Nothing')}
       />
+      <Section label="Or pick what to go easy on">
+        <TileGrid>
+          {BODY_AREAS.map((area) => {
+            const on = answers.limits.includes(area);
+            return (
+              <Tile
+                key={area}
+                label={area}
+                on={on}
+                tint={tint}
+                icon={
+                  <BodyIcon
+                    area={area}
+                    color={tint.ink}
+                    body={on ? colors.surface : colors.border}
+                  />
+                }
+                onPress={() => pick(area)}
+              />
+            );
+          })}
+          <Tile
+            label="Something else"
+            on={answers.limits.includes('Something else')}
+            tint={tint}
+            icon={<DotsIcon color={tint.ink} />}
+            onPress={() => pick('Something else')}
+          />
+        </TileGrid>
+      </Section>
     </StepScreen>
   );
 }

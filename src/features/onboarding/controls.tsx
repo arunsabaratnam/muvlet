@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react';
+import { Children, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts } from '@/constants/theme';
 
-import { ChevronIcon } from './icons';
+import { ChevronIcon, TickIcon } from './icons';
 
 /* The answer controls on the question steps, styled like the mockup. */
 
@@ -73,6 +73,109 @@ export function OptionRows<T extends string>({
         );
       })}
     </View>
+  );
+}
+
+/** One big row like OptionRows that ticks on and off, e.g. "I'm all good" above a grid. */
+export function CheckRow({
+  label,
+  icon,
+  on,
+  tint,
+  onPress,
+}: {
+  label: string;
+  icon: (color: string) => ReactNode;
+  on: boolean;
+  tint: Tint;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: on }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.row,
+        on && { borderColor: tint.ink, backgroundColor: tint.wash },
+        pressed && styles.pressed,
+      ]}>
+      <View style={[styles.rowIcon, { backgroundColor: on ? colors.surface : tint.wash }]}>
+        {icon(tint.ink)}
+      </View>
+      <Text style={styles.rowLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
+/** Lays tiles out three to a row; a short last row keeps the same tile width. */
+export function TileGrid({ children }: { children: ReactNode }) {
+  const tiles = Children.toArray(children);
+  const rows = Array.from({ length: Math.ceil(tiles.length / 3) }, (_, i) =>
+    tiles.slice(i * 3, i * 3 + 3),
+  );
+  return (
+    <View style={styles.grid}>
+      {rows.map((row, i) => (
+        <View key={i} style={styles.gridRow}>
+          {[0, 1, 2].map((cell) => (
+            <View key={cell} style={styles.gridCell}>
+              {row[cell]}
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** A square-ish tile in a TileGrid: an icon over a short label, ticked with a badge. */
+export function Tile({
+  label,
+  icon,
+  on,
+  tint,
+  count,
+  dashed,
+  role = 'checkbox',
+  onPress,
+}: {
+  label: string;
+  icon: ReactNode;
+  on: boolean;
+  tint: Tint;
+  /** Shown in the badge instead of a tick, e.g. how many extras were added. */
+  count?: number;
+  /** A quiet dashed tile while off, for one that opens more choices. */
+  dashed?: boolean;
+  role?: 'checkbox' | 'button';
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole={role}
+      accessibilityState={role === 'checkbox' ? { checked: on } : undefined}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.tile,
+        dashed && !on && styles.tileDashed,
+        on && { borderColor: tint.ink, backgroundColor: tint.wash },
+        pressed && styles.pressed,
+      ]}>
+      {on ? (
+        <View style={[styles.badge, { backgroundColor: tint.ink }]}>
+          {count ? (
+            <Text style={styles.badgeCount}>{count}</Text>
+          ) : (
+            <TickIcon color={colors.onPrimary} size={11} />
+          )}
+        </View>
+      ) : null}
+      {icon}
+      <Text numberOfLines={2} style={[styles.tileLabel, on && { color: tint.shade }]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -281,6 +384,57 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyExtraBold,
     fontSize: 18,
     color: colors.text,
+  },
+  grid: {
+    gap: 10,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  gridCell: {
+    flex: 1,
+  },
+  tile: {
+    minHeight: 92,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderBottomWidth: 5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  tileDashed: {
+    borderStyle: 'dashed',
+    borderBottomWidth: 2,
+    backgroundColor: 'transparent',
+  },
+  tileLabel: {
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 13,
+    lineHeight: 15,
+    textAlign: 'center',
+    color: colors.text,
+  },
+  badge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeCount: {
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 11,
+    color: colors.onPrimary,
   },
   segmented: {
     flexDirection: 'row',

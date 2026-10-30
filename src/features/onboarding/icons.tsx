@@ -1,5 +1,7 @@
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
+import { colors } from '@/constants/theme';
+
 /* The answer icons from the mockup, drawn on a 24-unit grid in one colour. */
 
 type IconProps = { color: string; size?: number };
@@ -73,6 +75,90 @@ export function TreeIcon({ color, size = 26 }: IconProps) {
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path d="M12 22v-6" stroke={color} strokeWidth={2.5} strokeLinecap="round" />
       <Circle cx={12} cy={9} r={7} fill={color} />
+    </Svg>
+  );
+}
+
+/** A filled circle with a tick cut out of it, for "all good". */
+export function CheckCircleIcon({ color, size = 26 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx={12} cy={12} r={10} fill={color} />
+      <Path
+        d="M7.5 12.5l3 3 6-6.5"
+        fill="none"
+        stroke={colors.surface}
+        strokeWidth={2.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+export function DotsIcon({ color, size = 28 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx={5} cy={12} r={2.6} fill={color} />
+      <Circle cx={12} cy={12} r={2.6} fill={color} />
+      <Circle cx={19} cy={12} r={2.6} fill={color} />
+    </Svg>
+  );
+}
+
+export type BodyArea =
+  'Knees' | 'Lower back' | 'Shoulders' | 'Wrists' | 'Neck' | 'Hips' | 'Elbows' | 'Ankles';
+
+// Where each area sits on the figure, on its 200 by 300 grid. Lower back is a bar instead.
+const AREA_SPOTS: Record<Exclude<BodyArea, 'Lower back'>, { x: number; y: number; r: number }[]> = {
+  Knees: [
+    { x: 84, y: 236, r: 28 },
+    { x: 116, y: 236, r: 28 },
+  ],
+  Shoulders: [
+    { x: 66, y: 78, r: 28 },
+    { x: 134, y: 78, r: 28 },
+  ],
+  Wrists: [
+    { x: 50, y: 200, r: 26 },
+    { x: 150, y: 200, r: 26 },
+  ],
+  Neck: [{ x: 100, y: 54, r: 26 }],
+  Hips: [
+    { x: 82, y: 180, r: 26 },
+    { x: 118, y: 180, r: 26 },
+  ],
+  Elbows: [
+    { x: 54, y: 150, r: 26 },
+    { x: 146, y: 150, r: 26 },
+  ],
+  Ankles: [
+    { x: 84, y: 282, r: 26 },
+    { x: 116, y: 282, r: 26 },
+  ],
+};
+
+/** A simple figure in `body` with one area marked in `color`. */
+export function BodyIcon({ area, color, body }: { area: BodyArea; color: string; body: string }) {
+  return (
+    <Svg width={28} height={42} viewBox="0 0 200 300">
+      <Path
+        d="M66 78L54 150L50 200M134 78L146 150L150 200M86 176L84 236L84 284M114 176L116 236L116 284"
+        fill="none"
+        stroke={body}
+        strokeWidth={26}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Rect x={64} y={56} width={72} height={126} rx={30} fill={body} />
+      <Circle cx={100} cy={28} r={23} fill={body} />
+      {area === 'Lower back' ? (
+        <Rect x={72} y={132} width={56} height={40} rx={20} fill={color} />
+      ) : (
+        AREA_SPOTS[area].map((spot) => (
+          <Circle key={spot.x} cx={spot.x} cy={spot.y} r={spot.r} fill={color} />
+        ))
+      )}
     </Svg>
   );
 }
