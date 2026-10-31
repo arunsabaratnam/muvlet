@@ -6,7 +6,6 @@ import {
   greeting,
   isQuiet,
   levelFor,
-  levelHint,
   MOCK_STEPS,
   nextStep,
   previewOf,
@@ -41,17 +40,6 @@ test('points fill levels', () => {
   expect(levelFor(1380)).toEqual({ number: 4, name: 'Gym Rookie', from: 1200, to: 1500 });
   expect(levelFor(1500)).toMatchObject({ number: 5, name: 'Gym Regular', to: 2000 });
   expect(levelFor(3000)).toMatchObject({ number: 7, to: undefined });
-});
-
-test('the level hint says what gets you to the next level', () => {
-  const workout = nextStep(MOCK_STEPS);
-  expect(workout?.title).toBe('Push Day A');
-  expect(levelHint(1380, workout)).toBe('Push Day A takes you to Level 5');
-
-  const stretch = MOCK_STEPS.find((step) => step.id === 'stretch');
-  expect(levelHint(1600, stretch)).toBe('400 pts to Level 6 · Wind-down stretch +20');
-  expect(levelHint(1600)).toBe('400 pts to Level 6');
-  expect(levelHint(3000)).toBeUndefined();
 });
 
 const withDone = (...ids: StepId[]) =>

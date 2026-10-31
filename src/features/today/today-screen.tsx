@@ -25,7 +25,6 @@ import {
   forYou,
   formatDay,
   greeting,
-  levelHint,
   MOCK_NAME,
   proteinToday,
   skyPhase,
@@ -125,7 +124,7 @@ function TodayDay({ start, focused, onTryDay }: TodayDayProps) {
           <Animated.View entering={riseIn(0)}>
             <LevelCard
               points={day.points}
-              hint={day.levelUp ?? levelHint(day.points, next, day.paused)}
+              hint={day.levelUp}
               hot={day.hot}
               gain={day.gain}
             />

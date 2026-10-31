@@ -36,7 +36,7 @@ const SPARK_COLORS = [
 
 type LevelCardProps = {
   points: number;
-  /** What gets you to the next level. */
+  /** A line under the bar, for the moment you level up. */
   hint?: string;
   /** Purple for a moment when points land. */
   hot?: boolean;
