@@ -33,8 +33,13 @@ export const coachColors = {
   luna: { wash: '#ECE6FF', ink: '#7A5CE6', shade: '#5E42C7' },
 } as const;
 
-/** The level card's badge and progress bar. */
-export const levelColors = { fill: '#7A5CE6', track: 'rgba(122, 92, 230, 0.16)' } as const;
+/** The level card's badge and progress bar; `glass` is the badge and bar on the purple card. */
+export const levelColors = {
+  fill: '#7A5CE6',
+  shade: '#5E42C7',
+  track: 'rgba(122, 92, 230, 0.16)',
+  glass: 'rgba(255, 255, 255, 0.25)',
+} as const;
 
 /**
  * The sky at the top of Today, one set per time of day: `sky`, `far` and `near` hills, the
