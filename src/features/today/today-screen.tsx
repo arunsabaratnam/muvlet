@@ -1,14 +1,19 @@
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeInDown,
   FadeOut,
+  useAnimatedReaction,
   useAnimatedRef,
+  useAnimatedStyle,
   useScrollOffset,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { colors, fonts } from '@/constants/theme';
 
@@ -32,21 +37,27 @@ import { FloatingStart } from './floating-start';
 import { ForYou } from './for-you';
 import { LevelCard } from './level-card';
 import { PreviewSheet } from './preview-sheet';
-import { Sky } from './sky';
+import { Sky, SKY_HEIGHT } from './sky';
 import { Tiles } from './tiles';
 import { TryDaySheet } from './try-day-sheet';
 import { useDay } from './use-day';
 
-export default function TodayScreen() {
+type TodayScreenProps = {
+  /** Whether Today is the tab showing; only then does it set the status bar. */
+  focused?: boolean;
+};
+
+export default function TodayScreen({ focused = true }: TodayScreenProps) {
   const [dayKey, setDayKey] = useState<DayKey>('normal');
   const [trying, setTrying] = useState(false);
 
   return (
-    <SafeAreaView edges={['top']} style={styles.screen}>
+    <View style={styles.screen}>
       {/* A fresh Today for each day tried. */}
       <TodayDay
         key={dayKey}
         start={DAYS[dayKey]}
+        focused={focused}
         // Development builds can open Today on other days to check them.
         onTryDay={__DEV__ ? () => setTrying(true) : undefined}
       />
@@ -61,12 +72,20 @@ export default function TodayScreen() {
           onClose={() => setTrying(false)}
         />
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }
 
-function TodayDay({ start, onTryDay }: { start: Day; onTryDay?: () => void }) {
+type TodayDayProps = {
+  start: Day;
+  focused: boolean;
+  onTryDay?: () => void;
+};
+
+function TodayDay({ start, focused, onTryDay }: TodayDayProps) {
   const now = useNow(start.at);
+  const phase = skyPhase(now);
+  const insets = useSafeAreaInsets();
   const minutes = now.getHours() * 60 + now.getMinutes();
   const day = useDay(start, minutes);
   const { next, say } = day;
@@ -76,16 +95,30 @@ function TodayDay({ start, onTryDay }: { start: Day; onTryDay?: () => void }) {
   const starting = useSharedValue(false);
   const workout = day.steps.find((step) => step.id === 'workout');
 
+  // Once the page scrolls up to the status bar, a strip of page colour goes behind the clock.
+  const [covered, setCovered] = useState(false);
+  useAnimatedReaction(
+    () => offset.get() >= SKY_HEIGHT,
+    (now, was) => {
+      if (was !== null && now !== was) scheduleOnRN(setCovered, now);
+    },
+  );
+  const coverStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(offset.value >= SKY_HEIGHT ? 1 : 0, { duration: 150 }),
+  }));
+
   return (
     <>
+      {focused ? <StatusBar style={phase === 'night' && !covered ? 'light' : 'dark'} /> : null}
       <Animated.ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <Sky
-          phase={skyPhase(now)}
+          phase={phase}
           date={formatDay(now)}
           greeting={greeting(now, MOCK_NAME)}
           initial={MOCK_NAME[0]}
           coach={say?.coach ?? (day.card && CARD_COACH[day.card]) ?? next?.coach ?? 'luna'}
           say={say}
+          offset={offset}
           onAvatarLongPress={onTryDay}
         />
         <View style={styles.page}>
@@ -143,6 +176,10 @@ function TodayDay({ start, onTryDay }: { start: Day; onTryDay?: () => void }) {
           </Animated.View>
         </View>
       </Animated.ScrollView>
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.cover, { height: insets.top }, coverStyle]}
+      />
       {workout ? (
         <FloatingStart
           workout={workout}
@@ -152,6 +189,7 @@ function TodayDay({ start, onTryDay }: { start: Day; onTryDay?: () => void }) {
           }
           scrollRef={scrollRef}
           offset={offset}
+          topInset={insets.top}
           cardRef={workoutRef}
           showing={starting}
           onStart={day.finish}
@@ -187,6 +225,13 @@ function useNow(fixed?: Date) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  cover: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     backgroundColor: colors.background,
   },
   // Room at the bottom for the floating Start.

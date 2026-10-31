@@ -79,7 +79,8 @@ export const skyColors = {
   night: {
     sky: '#2B3668',
     far: '#38497F',
-    near: '#283A66',
+    // Lighter than the sky, so the hills step towards the page below them.
+    near: '#44558E',
     sun: '#FFE7A3',
     ink: '#FFFFFF',
     inkSoft: 'rgba(255, 255, 255, 0.74)',
