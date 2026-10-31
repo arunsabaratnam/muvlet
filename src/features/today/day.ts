@@ -1,5 +1,4 @@
 import type { CoachName } from '@/features/welcome/coach';
-import { withCommas } from '@/features/onboarding/plan';
 
 /*
  * Today's plan and the maths behind the top of the screen. There's no saved data yet,
@@ -444,15 +443,4 @@ export type Level = {
 export function levelFor(points: number): Level {
   const index = LEVELS.filter((level) => points >= level.from).length - 1;
   return { number: index + 1, ...LEVELS[index], to: LEVELS[index + 1]?.from };
-}
-
-/** What gets you to the next level, e.g. "Push Day A takes you to Level 5". */
-export function levelHint(points: number, next?: Step, paused = false) {
-  const { number, to } = levelFor(points);
-  if (to === undefined) return undefined;
-  const left = to - points;
-  if (paused) return `${withCommas(left)} pts to Level ${number + 1}. Your level waits for you.`;
-  if (next && next.points >= left) return `${next.title} takes you to Level ${number + 1}`;
-  const hint = `${withCommas(left)} pts to Level ${number + 1}`;
-  return next ? `${hint} · ${next.title} +${next.points}` : hint;
 }

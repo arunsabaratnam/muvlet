@@ -37,7 +37,7 @@ test('shows the day, the greeting and the level', async () => {
   expect(screen.getByText('Good evening, Arun')).toBeOnTheScreen();
   expect(screen.getByText('Gym Rookie')).toBeOnTheScreen();
   expect(screen.getByText('1,380 / 1,500')).toBeOnTheScreen();
-  expect(screen.getByText('Push Day A takes you to Level 5')).toBeOnTheScreen();
+  expect(screen.queryByText('Push Day A takes you to Level 5')).not.toBeOnTheScreen();
 });
 
 test('lays the day out in sections, with breakfast already done', async () => {
@@ -214,7 +214,6 @@ test('on a break, meals are optional until the plan is back on', async () => {
 
   expect(screen.getByText('Breakfast · optional')).toBeOnTheScreen();
   expect(screen.getByText('Streak on hold')).toBeOnTheScreen();
-  expect(screen.getByText('120 pts to Level 5. Your level waits for you.')).toBeOnTheScreen();
   expect(screen.queryByText('Push Day A')).not.toBeOnTheScreen();
 
   await fireEvent.press(screen.getByText('Resume now'));
