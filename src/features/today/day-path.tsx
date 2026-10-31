@@ -3,8 +3,8 @@ import Animated, {
   Easing,
   FadeIn,
   FadeOut,
+  Keyframe,
   LinearTransition,
-  ZoomIn,
   type AnimatedRef,
 } from 'react-native-reanimated';
 import Svg, { Line, Path } from 'react-native-svg';
@@ -29,9 +29,15 @@ import { Press } from './press';
 import { WorkoutCard } from './workout-card';
 
 // Things slide to where they now belong instead of jumping (mockup FLIP: 460 ms).
-export const MOVE = LinearTransition.duration(460).easing(Easing.bezier(0.22, 1, 0.36, 1));
+const EASE = Easing.bezier(0.22, 1, 0.36, 1);
+export const MOVE = LinearTransition.duration(460).easing(EASE);
 const FOLD = FadeOut.duration(380);
-const POP = ZoomIn.springify().damping(11).stiffness(260);
+const CHIP_IN = FadeIn.duration(260);
+// A tick eases into place and stops. It never goes past its final size.
+export const SETTLE = new Keyframe({
+  0: { opacity: 0, transform: [{ scale: 0.8 }] },
+  100: { opacity: 1, transform: [{ scale: 1 }], easing: EASE },
+}).duration(200);
 
 type DayPathProps = {
   sections: Section[];
@@ -71,14 +77,20 @@ export function DayPath({ sections, expanded, onToggleSection, ...rest }: DayPat
             <View style={styles.header}>
               <Text style={[styles.title, section.past && styles.pastTitle]}>{section.title}</Text>
               {folded.length > 0 ? (
-                <Animated.View key={doneLabel(folded)} entering={POP}>
+                <Animated.View entering={CHIP_IN} layout={MOVE}>
                   <Press
                     accessibilityRole="button"
                     accessibilityState={{ expanded: open }}
                     onPress={() => onToggleSection(section.title)}
                     style={styles.chip}>
                     <Tick size={14} color={colors.success} width={3} />
-                    <Text style={styles.chipText}>{doneLabel(folded)}</Text>
+                    {/* Only the words fade when the label changes, so the chip stays put. */}
+                    <Animated.Text
+                      key={doneLabel(folded)}
+                      entering={CHIP_IN}
+                      style={styles.chipText}>
+                      {doneLabel(folded)}
+                    </Animated.Text>
                   </Press>
                 </Animated.View>
               ) : null}
@@ -166,7 +178,7 @@ function StepRow({
           done && (step.skipped ? styles.dotSkipped : styles.dotDone),
         ]}>
         {done ? (
-          <Animated.View entering={step.id === justDone ? POP : undefined}>
+          <Animated.View entering={step.id === justDone ? SETTLE : undefined}>
             <Tick size={13} color="#FFFFFF" width={3.5} />
           </Animated.View>
         ) : null}
