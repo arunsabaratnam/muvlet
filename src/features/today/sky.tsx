@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -55,6 +55,8 @@ type SkyProps = {
   coach: CoachName;
   /** A line the coach is saying; it takes the greeting's place while it shows. */
   say?: { coach: CoachName; text: string };
+  /** Long-pressing the avatar, in development builds only. */
+  onAvatarLongPress?: () => void;
 };
 
 // The coach's line grows out from beside them.
@@ -63,7 +65,7 @@ const SAY_IN = new Keyframe({
   100: { opacity: 1, transform: [{ scale: 1 }, { translateY: 0 }] },
 }).duration(450);
 
-export function Sky({ phase, date, greeting, initial, coach, say }: SkyProps) {
+export function Sky({ phase, date, greeting, initial, coach, say, onAvatarLongPress }: SkyProps) {
   const ink = skyColors[phase];
   // When the time of day changes, the new sky fades in over the old one.
   const [layers, setLayers] = useState({ under: phase, over: phase });
@@ -90,9 +92,12 @@ export function Sky({ phase, date, greeting, initial, coach, say }: SkyProps) {
           {greeting}
         </Text>
       </Animated.View>
-      <View style={styles.avatar}>
+      <Pressable
+        accessible={!!onAvatarLongPress}
+        onLongPress={onAvatarLongPress}
+        style={styles.avatar}>
         <Text style={styles.initial}>{initial}</Text>
-      </View>
+      </Pressable>
       <Animated.View key={coach} entering={FadeIn.duration(400)} style={styles.coach}>
         <SkyCoach name={coach} />
       </Animated.View>

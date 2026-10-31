@@ -15,7 +15,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { colors, fonts } from '@/constants/theme';
 
-import { WORKOUT, type Step } from './day';
+import { workoutOf, type Step } from './day';
 import { Play } from './icons';
 import { Press } from './press';
 
@@ -98,7 +98,7 @@ export function FloatingStart({
           <Play size={14} color={colors.primary} />
         </View>
         <Text numberOfLines={1} style={styles.label}>{`Start ${workout.title}`}</Text>
-        <Text style={styles.time}>{`${WORKOUT.minutes} min`}</Text>
+        <Text style={styles.time}>{`${workoutOf(workout).minutes} min`}</Text>
       </Press>
     </Animated.View>
   );

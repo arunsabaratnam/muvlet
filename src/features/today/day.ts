@@ -3,10 +3,10 @@ import { withCommas } from '@/features/onboarding/plan';
 
 /*
  * Today's plan and the maths behind the top of the screen. There's no saved data yet,
- * so the day is mock data, the same as the mockup's normal day.
+ * so the day is mock data, the same as the mockup's normal day. Other days are in days.ts.
  */
 
-export type StepId = 'breakfast' | 'workout' | 'dinner' | 'stretch';
+export type StepId = 'breakfast' | 'workout' | 'walk' | 'dinner' | 'stretch';
 
 export type Step = {
   id: StepId;
@@ -29,8 +29,14 @@ export type Step = {
   doneDetail: string;
   /** Grams of protein in a meal, counted once it's logged. */
   protein?: number;
-  /** Minutes after midnight; undefined until done. */
+  /** Minutes after midnight when a meal not logged yet becomes "log it later". */
+  lapsesAt?: number;
+  /** Minutes after midnight; undefined until done or skipped. */
   doneAt?: number;
+  /** Let go for today, with no points. */
+  skipped?: boolean;
+  /** A lighter workout, to ease back in after time away. */
+  lite?: boolean;
 };
 
 export const MOCK_NAME = 'Arun';
@@ -51,6 +57,7 @@ export const MOCK_STEPS: Step[] = [
     result: '28 g protein',
     doneDetail: 'Oats and berries · 28 g protein',
     protein: 28,
+    lapsesAt: 11 * 60,
     doneAt: 8 * 60 + 10,
   },
   {
@@ -81,6 +88,7 @@ export const MOCK_STEPS: Step[] = [
     result: '38 g protein',
     doneDetail: 'Dinner · 38 g protein',
     protein: 38,
+    lapsesAt: 22 * 60 + 30,
   },
   {
     id: 'stretch',
@@ -98,12 +106,30 @@ export const MOCK_STEPS: Step[] = [
   },
 ];
 
-/** Push Day A, as its big card shows it. */
-export const WORKOUT = {
-  minutes: 45,
-  focus: 'Chest, shoulders and triceps',
-  progress: 'Bench 35 lb · up from 30 lb',
+/** On a rest day, instead of the workout. */
+export const WALK: Step = {
+  id: 'walk',
+  coach: 'luna',
+  plannedAt: 11 * 60,
+  points: 10,
+  title: 'Easy walk · optional',
+  doneTitle: 'Walk done',
+  detail: '20 min · any pace',
+  action: 'Start walk',
+  tip: 'A gentle walk helps sore legs.',
+  name: 'Walk',
+  result: '20 min',
+  doneDetail: '20 min · any pace',
 };
+
+/** Push Day A, as its big card shows it. */
+export function workoutOf(step: Step) {
+  return {
+    minutes: step.lite ? 35 : 45,
+    focus: 'Chest, shoulders and triceps',
+    progress: step.lite ? 'Bench 30 lb · lighter to start' : 'Bench 35 lb · up from 30 lb',
+  };
+}
 
 export type Preview = {
   /** Above the title, e.g. "Workout · 45 min". */
@@ -118,7 +144,23 @@ export type Preview = {
 };
 
 /** What's inside a step, for the sheet that previews it before you start. */
-export const PREVIEWS: Partial<Record<StepId, Preview>> = {
+export function previewOf(step: Step): Preview | undefined {
+  const preview = PREVIEWS[step.id];
+  if (!preview || !step.lite) return preview;
+  // Lighter: 35 minutes, and the bench back at last time's weight.
+  return {
+    ...preview,
+    kind: 'Workout · 35 min',
+    chips: ['35 min', '5 exercises', `+${step.points} pts`],
+    up: undefined,
+    items: preview.items.map(({ name, detail }, index) => ({
+      name,
+      detail: index === 0 ? '3 × 8 · 30 lb' : detail,
+    })),
+  };
+}
+
+const PREVIEWS: Partial<Record<StepId, Preview>> = {
   workout: {
     kind: 'Workout · 45 min',
     focus: 'Chest, shoulders and triceps',
@@ -148,50 +190,76 @@ export const PREVIEWS: Partial<Record<StepId, Preview>> = {
   },
 };
 
-// The day's protein goal, and what was eaten outside the steps (lunch and snacks).
 const PROTEIN_GOAL = 150;
-const PROTEIN_ELSEWHERE = 64;
 
-/** Protein eaten today and the share of the goal, for the ring on Today. */
-export function proteinToday(steps: Step[]) {
+/**
+ * Protein eaten today and the share of the goal, for the ring on Today. `elsewhere` is what
+ * was eaten outside the steps, like lunch and snacks.
+ */
+export function proteinToday(steps: Step[], elsewhere: number) {
   const eaten = steps.reduce(
-    (sum, step) => sum + (step.doneAt === undefined ? 0 : (step.protein ?? 0)),
-    PROTEIN_ELSEWHERE,
+    (sum, step) => sum + (step.doneAt === undefined || step.skipped ? 0 : (step.protein ?? 0)),
+    elsewhere,
   );
   return { left: Math.max(0, PROTEIN_GOAL - eaten), share: Math.min(1, eaten / PROTEIN_GOAL) };
 }
 
-// Workouts are planned for Monday, Wednesday and Friday, and the streak is 4 weeks long so far.
-const PLAN_DAYS = [0, 2, 4];
-const STREAK_WEEKS = 4;
+const WEEKDAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
+const MONTHS = 'Jan Feb March April May June July Aug Sept Oct Nov Dec'.split(' ');
 const DAY_LETTERS = 'M T W T F S S'.split(' ');
 
-export type WeekDay = { letter: string; today: boolean; state: 'done' | 'planned' | 'rest' };
+export type Week = {
+  /** Days with a workout, 0 for Monday. Left out, it's today and two more spread over the week. */
+  plan?: number[];
+  /** Weeks in a row on plan before this one. */
+  streak: number;
+  /** Planned days earlier this week that didn't happen. */
+  missed?: number[];
+  /** Back after time away, so the streak starts again. */
+  fresh?: boolean;
+  /** The plan is paused until then, and the streak is held. */
+  pausedUntil?: Date;
+};
+
+export type WeekDay = {
+  letter: string;
+  today: boolean;
+  state: 'done' | 'planned' | 'missed' | 'rest';
+};
 
 /**
- * This week, Monday first, for the streak on Today. Earlier workouts this week were done,
- * and today has a workout whatever day it is.
+ * This week, Monday first, for the streak on Today. Planned days before today were done
+ * unless they were missed, and today's dot follows today's workout.
  */
-export function thisWeek(now: Date, trained: boolean) {
+export function thisWeek(now: Date, week: Week, workout?: Step) {
   const today = (now.getDay() + 6) % 7;
+  const plan = week.plan ?? [0, 2, 4].map((day) => (today + day) % 7);
   const days: WeekDay[] = DAY_LETTERS.map((letter, index) => {
-    const planned = PLAN_DAYS.includes(index) || index === today;
-    const done = planned && (index < today || (index === today && trained));
-    return {
-      letter,
-      today: index === today,
-      state: done ? 'done' : planned ? 'planned' : 'rest',
-    };
+    let state: WeekDay['state'] = 'rest';
+    if (index === today && workout) state = workout.doneAt === undefined ? 'planned' : 'done';
+    else if (!plan.includes(index)) state = 'rest';
+    else if (index > today || (index === today && week.pausedUntil)) state = 'planned';
+    else if (index < today) state = week.missed?.includes(index) ? 'missed' : 'done';
+    return { letter, today: index === today, state };
   });
+
   const done = days.filter((day) => day.state === 'done').length;
-  const planned = days.filter((day) => day.state !== 'rest').length;
-  const finished = done === planned;
+  const goal = plan.length;
+  if (week.pausedUntil) {
+    const until = week.pausedUntil;
+    const short = `${WEEKDAYS[until.getDay()].slice(0, 3)}, ${MONTHS[until.getMonth()]} ${until.getDate()}`;
+    return { days, held: true, title: 'Streak on hold', detail: `Paused until ${short}` };
+  }
+  const finished = done >= goal;
   return {
     days,
-    title: `${finished ? STREAK_WEEKS + 1 : STREAK_WEEKS}-week streak`,
+    held: false,
+    title: week.fresh
+      ? 'New streak · week 1'
+      : `${finished ? week.streak + 1 : week.streak}-week streak`,
     detail: finished
-      ? `${done} of ${planned} workouts. Week done!`
-      : `${done} of ${planned} workouts this week`,
+      ? `${done} of ${goal} workouts. Week done!`
+      : `${done} of ${goal} workouts this week`,
   };
 }
 
@@ -218,15 +286,30 @@ const READS = {
     kind: 'For tomorrow · 5 min',
     title: '3 quick high-protein breakfasts',
   },
+  rest: {
+    coach: 'luna',
+    kind: 'Rest day · 2 min read',
+    title: 'What rest days do for your muscles',
+  },
+  away: {
+    coach: 'luna',
+    kind: 'On your break · 5 min',
+    title: 'An easy stretch you can do anywhere',
+  },
 } satisfies Record<string, Read>;
 
 /** Two short reads from the coaches, about what's left of today. */
-export function forYou(steps: Step[]): Read[] {
+export function forYou(steps: Step[], paused = false): Read[] {
+  const has = (id: StepId) => steps.some((step) => step.id === id);
   const done = (id: StepId) => steps.some((step) => step.id === id && step.doneAt !== undefined);
-  return [
-    done('workout') ? READS.sore : READS.bench,
-    done('dinner') ? READS.breakfast : READS.dinner,
-  ];
+  const first = done('workout')
+    ? READS.sore
+    : paused
+      ? READS.away
+      : has('walk')
+        ? READS.rest
+        : READS.bench;
+  return [first, done('dinner') ? READS.breakfast : READS.dinner];
 }
 
 /** Once the workout is done, dinner is about recovery. */
@@ -249,9 +332,31 @@ export const DONE_LINES: Record<CoachName, string> = {
   luna: 'Nice and loose. Sleep well.',
 };
 
-/** The first step not done yet. */
-export function nextStep(steps: Step[]) {
-  return steps.find((step) => step.doneAt === undefined);
+/** A meal whose time has passed, so it shows as a quiet "log it later" line. */
+export function isLapsed(step: Step, now: number) {
+  return step.doneAt === undefined && step.lapsesAt !== undefined && now >= step.lapsesAt;
+}
+
+/** A quiet line instead of a card: a lapsed meal, or any meal while the plan is paused. */
+export function isQuiet(step: Step, now: number, paused = false) {
+  return isLapsed(step, now) || (paused && step.doneAt === undefined && step.protein !== undefined);
+}
+
+/** Late at night, the stretch can be let go. */
+export function canLetGo(step: Step, now: number) {
+  return step.id === 'stretch' && now >= 22 * 60 + 30;
+}
+
+/** A done or skipped step's title and the line under it. */
+export function doneText(step: Step) {
+  return step.skipped
+    ? { title: `${step.name} · skipped`, detail: 'No points lost' }
+    : { title: step.doneTitle, detail: step.doneDetail };
+}
+
+/** The first step still to do that isn't a quiet line. */
+export function nextStep(steps: Step[], now = 0, paused = false) {
+  return steps.find((step) => step.doneAt === undefined && !isQuiet(step, now, paused));
 }
 
 const SECTION_TITLES = ['Morning', 'Afternoon', 'Evening', 'Before bed'];
@@ -272,10 +377,12 @@ export type Section = {
 
 /**
  * The day in sections. A done step sits where it was done; a step still to do sits at its
- * planned time, or now if that has passed. Nothing is ever late.
+ * planned time, or now if that has passed. Nothing is ever late: a meal whose time has
+ * passed stays where it was planned, as a quiet line.
  */
 export function daySections(steps: Step[], now: number): Section[] {
-  const at = (step: Step) => step.doneAt ?? Math.max(step.plannedAt, now);
+  const at = (step: Step) =>
+    step.doneAt ?? (isLapsed(step, now) ? step.plannedAt : Math.max(step.plannedAt, now));
   const sorted = [...steps].sort((a, b) => at(a) - at(b) || a.plannedAt - b.plannedAt);
   return SECTION_TITLES.map((title, index) => ({
     title,
@@ -286,7 +393,9 @@ export function daySections(steps: Step[], now: number): Section[] {
 
 /** The label on a section's done chip. */
 export function doneLabel(done: Step[]) {
-  if (done.length === 1) return `${done[0].name} · ${done[0].result}`;
+  if (done.length === 1) {
+    return `${done[0].name} · ${done[0].skipped ? 'skipped' : done[0].result}`;
+  }
   if (done.length === 2) return `${done[0].name} and ${done[1].name.toLowerCase()}`;
   return `${done.length} done`;
 }
@@ -308,9 +417,6 @@ export function greeting(now: Date, name: string) {
   const part = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
   return `Good ${part}, ${name}`;
 }
-
-const WEEKDAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
-const MONTHS = 'Jan Feb March April May June July Aug Sept Oct Nov Dec'.split(' ');
 
 /** "Monday, Sept 28", without relying on the device's locale. */
 export function formatDay(now: Date) {
@@ -341,10 +447,11 @@ export function levelFor(points: number): Level {
 }
 
 /** What gets you to the next level, e.g. "Push Day A takes you to Level 5". */
-export function levelHint(points: number, next?: Step) {
+export function levelHint(points: number, next?: Step, paused = false) {
   const { number, to } = levelFor(points);
   if (to === undefined) return undefined;
   const left = to - points;
+  if (paused) return `${withCommas(left)} pts to Level ${number + 1}. Your level waits for you.`;
   if (next && next.points >= left) return `${next.title} takes you to Level ${number + 1}`;
   const hint = `${withCommas(left)} pts to Level ${number + 1}`;
   return next ? `${hint} · ${next.title} +${next.points}` : hint;
