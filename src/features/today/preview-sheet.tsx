@@ -5,7 +5,7 @@ import { Button, Sheet } from '@/components/ui';
 import { coachColors, colors, fonts } from '@/constants/theme';
 
 import { CoachFace } from './coach-face';
-import { PREVIEWS, type Step } from './day';
+import { previewOf, type Step } from './day';
 import { UpArrow } from './icons';
 
 type PreviewSheetProps = {
@@ -21,11 +21,11 @@ export function PreviewSheet({ step, onStart, onClose }: PreviewSheetProps) {
   const [last, setLast] = useState(step);
   if (step && step !== last) setLast(step);
   const shown = step ?? last;
-  const preview = shown && PREVIEWS[shown.id];
+  const preview = shown && previewOf(shown);
 
   return (
     <Sheet
-      visible={!!step && !!PREVIEWS[step.id]}
+      visible={!!step && !!previewOf(step)}
       onClose={onClose}
       header={
         shown && preview ? (

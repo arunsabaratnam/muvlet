@@ -20,7 +20,8 @@ const POP = ZoomIn.springify().damping(11).stiffness(260);
 
 type TilesProps = {
   protein: { left: number; share: number };
-  week: { days: WeekDay[]; title: string; detail: string };
+  /** `held` while the plan is paused: the streak waits, and the planned days go grey. */
+  week: { days: WeekDay[]; held: boolean; title: string; detail: string };
 };
 
 /** Protein left today, and this week's workouts with the streak. */
@@ -41,12 +42,14 @@ export function Tiles({ protein, week }: TilesProps) {
         style={[styles.tile, styles.week]}>
         <View style={styles.weekTop}>
           <View style={styles.weekTitle}>
-            <Svg width={17} height={17} viewBox="0 0 24 24">
-              <Path
-                d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3 0-4-1-6 1-9z"
-                fill={colors.warning}
-              />
-            </Svg>
+            {week.held ? null : (
+              <Svg width={17} height={17} viewBox="0 0 24 24">
+                <Path
+                  d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3 0-4-1-6 1-9z"
+                  fill={colors.warning}
+                />
+              </Svg>
+            )}
             <Text style={styles.weekText}>{week.title}</Text>
           </View>
           <Text style={styles.small}>{week.detail}</Text>
@@ -54,7 +57,12 @@ export function Tiles({ protein, week }: TilesProps) {
         <View style={styles.days}>
           {week.days.map((day, index) => (
             <View key={index} style={styles.day}>
-              <View style={[styles.dot, day.state === 'planned' && styles.planned]}>
+              <View
+                style={[
+                  styles.dot,
+                  day.state === 'planned' && (week.held ? styles.held : styles.planned),
+                  day.state === 'missed' && styles.missed,
+                ]}>
                 {day.state === 'done' ? (
                   // A workout done today pops in.
                   <Animated.View entering={day.today ? POP : undefined} style={styles.done}>
@@ -185,6 +193,15 @@ const styles = StyleSheet.create({
   planned: {
     borderWidth: 2.5,
     borderColor: tileColors.week,
+  },
+  held: {
+    borderWidth: 2.5,
+    borderColor: 'rgba(102, 116, 135, 0.45)',
+  },
+  missed: {
+    borderWidth: 2.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(102, 116, 135, 0.6)',
   },
   done: {
     width: 19,

@@ -5,7 +5,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { colors, fonts } from '@/constants/theme';
 
 import { CoachFace } from './coach-face';
-import { WORKOUT, type Step } from './day';
+import { workoutOf, type Step } from './day';
 import { UpArrow } from './icons';
 import { Press } from './press';
 
@@ -19,6 +19,7 @@ type WorkoutCardProps = {
 
 /** Push Day A as one big blue card when it's the open step. Tap it to see what's in it. */
 export function WorkoutCard({ step, cardRef, onStart, onPreview }: WorkoutCardProps) {
+  const workout = workoutOf(step);
   return (
     // Not flattened away on Android, so it can be measured.
     <Animated.View ref={cardRef} collapsable={false}>
@@ -38,12 +39,12 @@ export function WorkoutCard({ step, cardRef, onStart, onPreview }: WorkoutCardPr
           <View style={styles.face}>
             <CoachFace coach={step.coach} size={72} zoom={0.75} tint="rgba(255, 255, 255, 0.2)" />
           </View>
-          <Text style={styles.eyebrow}>{`Today's workout · ${WORKOUT.minutes} min`}</Text>
+          <Text style={styles.eyebrow}>{`Today's workout · ${workout.minutes} min`}</Text>
           <Text style={styles.title}>{step.title}</Text>
-          <Text style={styles.focus}>{WORKOUT.focus}</Text>
+          <Text style={styles.focus}>{workout.focus}</Text>
           <View style={styles.chip}>
             <UpArrow size={14} color={colors.onPrimary} />
-            <Text style={styles.chipText}>{WORKOUT.progress}</Text>
+            <Text style={styles.chipText}>{workout.progress}</Text>
           </View>
           <View style={styles.buttons}>
             <Press accessibilityRole="button" onPress={onStart} style={styles.start}>
