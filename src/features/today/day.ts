@@ -27,6 +27,8 @@ export type Step = {
   result: string;
   /** Under the title once done. */
   doneDetail: string;
+  /** Grams of protein in a meal, counted once it's logged. */
+  protein?: number;
   /** Minutes after midnight; undefined until done. */
   doneAt?: number;
 };
@@ -48,6 +50,7 @@ export const MOCK_STEPS: Step[] = [
     name: 'Breakfast',
     result: '28 g protein',
     doneDetail: 'Oats and berries · 28 g protein',
+    protein: 28,
     doneAt: 8 * 60 + 10,
   },
   {
@@ -77,6 +80,7 @@ export const MOCK_STEPS: Step[] = [
     name: 'Dinner',
     result: '38 g protein',
     doneDetail: 'Dinner · 38 g protein',
+    protein: 38,
   },
   {
     id: 'stretch',
@@ -143,6 +147,87 @@ export const PREVIEWS: Partial<Record<StepId, Preview>> = {
     need: 'No equipment. The floor or your bed is fine.',
   },
 };
+
+// The day's protein goal, and what was eaten outside the steps (lunch and snacks).
+const PROTEIN_GOAL = 150;
+const PROTEIN_ELSEWHERE = 64;
+
+/** Protein eaten today and the share of the goal, for the ring on Today. */
+export function proteinToday(steps: Step[]) {
+  const eaten = steps.reduce(
+    (sum, step) => sum + (step.doneAt === undefined ? 0 : (step.protein ?? 0)),
+    PROTEIN_ELSEWHERE,
+  );
+  return { left: Math.max(0, PROTEIN_GOAL - eaten), share: Math.min(1, eaten / PROTEIN_GOAL) };
+}
+
+// Workouts are planned for Monday, Wednesday and Friday, and the streak is 4 weeks long so far.
+const PLAN_DAYS = [0, 2, 4];
+const STREAK_WEEKS = 4;
+const DAY_LETTERS = 'M T W T F S S'.split(' ');
+
+export type WeekDay = { letter: string; today: boolean; state: 'done' | 'planned' | 'rest' };
+
+/**
+ * This week, Monday first, for the streak on Today. Earlier workouts this week were done,
+ * and today has a workout whatever day it is.
+ */
+export function thisWeek(now: Date, trained: boolean) {
+  const today = (now.getDay() + 6) % 7;
+  const days: WeekDay[] = DAY_LETTERS.map((letter, index) => {
+    const planned = PLAN_DAYS.includes(index) || index === today;
+    const done = planned && (index < today || (index === today && trained));
+    return {
+      letter,
+      today: index === today,
+      state: done ? 'done' : planned ? 'planned' : 'rest',
+    };
+  });
+  const done = days.filter((day) => day.state === 'done').length;
+  const planned = days.filter((day) => day.state !== 'rest').length;
+  const finished = done === planned;
+  return {
+    days,
+    title: `${finished ? STREAK_WEEKS + 1 : STREAK_WEEKS}-week streak`,
+    detail: finished
+      ? `${done} of ${planned} workouts. Week done!`
+      : `${done} of ${planned} workouts this week`,
+  };
+}
+
+export type Read = { coach: CoachName; kind: string; title: string };
+
+const READS = {
+  bench: {
+    coach: 'axel',
+    kind: 'Before your workout · 1 min',
+    title: 'Set up the bench the right way',
+  },
+  sore: {
+    coach: 'luna',
+    kind: 'After training · 2 min read',
+    title: 'Why sore muscles are normal',
+  },
+  dinner: {
+    coach: 'sage',
+    kind: 'For tonight · 15 min',
+    title: 'High-protein dinners in 15 minutes',
+  },
+  breakfast: {
+    coach: 'sage',
+    kind: 'For tomorrow · 5 min',
+    title: '3 quick high-protein breakfasts',
+  },
+} satisfies Record<string, Read>;
+
+/** Two short reads from the coaches, about what's left of today. */
+export function forYou(steps: Step[]): Read[] {
+  const done = (id: StepId) => steps.some((step) => step.id === id && step.doneAt !== undefined);
+  return [
+    done('workout') ? READS.sore : READS.bench,
+    done('dinner') ? READS.breakfast : READS.dinner,
+  ];
+}
 
 /** Once the workout is done, dinner is about recovery. */
 export function stepText(step: Step, steps: Step[]) {
