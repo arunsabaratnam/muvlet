@@ -12,7 +12,18 @@ import Svg, { Line, Path } from 'react-native-svg';
 import { colors, fonts } from '@/constants/theme';
 
 import { CoachFace } from './coach-face';
-import { doneLabel, PREVIEWS, stepText, type Section, type Step, type StepId } from './day';
+import {
+  canLetGo,
+  doneLabel,
+  doneText,
+  isLapsed,
+  isQuiet,
+  previewOf,
+  stepText,
+  type Section,
+  type Step,
+  type StepId,
+} from './day';
 import { Chevron } from './icons';
 import { Press } from './press';
 import { WorkoutCard } from './workout-card';
@@ -26,6 +37,10 @@ type DayPathProps = {
   sections: Section[];
   /** All of today's steps, for text that depends on other steps. */
   steps: Step[];
+  /** Minutes after midnight. */
+  now: number;
+  /** While the plan is paused, meals are optional quiet lines. */
+  paused: boolean;
   next?: Step;
   openId?: StepId;
   /** Just finished: shows done for a moment before folding into its section's chip. */
@@ -36,6 +51,7 @@ type DayPathProps = {
   onOpen: (id: StepId) => void;
   onPreview: (step: Step) => void;
   onFinish: (step: Step) => void;
+  onSkip: (step: Step) => void;
   onUndo: (step: Step) => void;
   onToggleSection: (title: string) => void;
 };
@@ -104,6 +120,8 @@ export function DayPath({ sections, expanded, onToggleSection, ...rest }: DayPat
 function StepRow({
   step,
   steps,
+  now,
+  paused,
   next,
   openId,
   justDone,
@@ -111,16 +129,42 @@ function StepRow({
   onOpen,
   onPreview,
   onFinish,
+  onSkip,
   onUndo,
 }: Omit<DayPathProps, 'sections' | 'expanded' | 'onToggleSection'> & { step: Step }) {
   const done = step.doneAt !== undefined;
+  const ended = doneText(step);
   const open = step.id === (openId ?? next?.id) || step.id === justDone;
   const { detail } = stepText(step, steps);
-  const preview = PREVIEWS[step.id];
+  const preview = previewOf(step);
+
+  // A meal whose time has passed, or one that's optional on a break: one quiet line.
+  if (isQuiet(step, now, paused)) {
+    return (
+      <View style={styles.quiet}>
+        <View style={[styles.dot, styles.quietDot]} />
+        <Text style={styles.quietText}>
+          {`${step.name} · ${isLapsed(step, now) ? 'log it later' : 'optional'}`}
+        </Text>
+        <Press
+          accessibilityRole="button"
+          accessibilityLabel={`Log ${step.name.toLowerCase()}`}
+          onPress={() => onFinish(step)}
+          style={styles.logIt}>
+          <Text style={styles.logItText}>Log it</Text>
+        </Press>
+      </View>
+    );
+  }
 
   return (
     <>
-      <View style={[styles.dot, step.id === next?.id && styles.dotNow, done && styles.dotDone]}>
+      <View
+        style={[
+          styles.dot,
+          step.id === next?.id && styles.dotNow,
+          done && (step.skipped ? styles.dotSkipped : styles.dotDone),
+        ]}>
         {done ? (
           <Animated.View entering={step.id === justDone ? POP : undefined}>
             <Tick size={13} color="#FFFFFF" width={3.5} />
@@ -137,8 +181,8 @@ function StepRow({
       ) : open ? (
         <View style={[styles.card, styles.openCard, done && styles.doneCard]}>
           <View style={styles.info}>
-            <Text style={styles.cardTitle}>{done ? step.doneTitle : step.title}</Text>
-            <Text style={styles.detail}>{done ? step.doneDetail : detail}</Text>
+            <Text style={styles.cardTitle}>{done ? ended.title : step.title}</Text>
+            <Text style={styles.detail}>{done ? ended.detail : detail}</Text>
             {done ? (
               step.id !== justDone && (
                 <Text
@@ -167,6 +211,15 @@ function StepRow({
                   style={styles.action}>
                   <Text style={styles.actionText}>{step.action}</Text>
                 </Press>
+                {canLetGo(step, now) ? (
+                  <Text
+                    accessibilityRole="button"
+                    onPress={() => onSkip(step)}
+                    suppressHighlighting
+                    style={styles.letGo}>
+                    Not tonight
+                  </Text>
+                ) : null}
               </>
             )}
           </View>
@@ -179,8 +232,8 @@ function StepRow({
           onPress={() => onOpen(step.id)}
           style={[styles.card, done && styles.foldedCard]}>
           <View style={styles.info}>
-            <Text style={styles.cardTitle}>{done ? step.doneTitle : step.title}</Text>
-            {done ? <Text style={styles.result}>{step.doneDetail}</Text> : null}
+            <Text style={styles.cardTitle}>{done ? ended.title : step.title}</Text>
+            {done ? <Text style={styles.result}>{ended.detail}</Text> : null}
           </View>
           <CoachFace coach={step.coach} size={34} />
         </Press>
@@ -278,6 +331,51 @@ const styles = StyleSheet.create({
     borderColor: colors.success,
     backgroundColor: colors.success,
     boxShadow: 'none',
+  },
+  dotSkipped: {
+    borderColor: colors.textFaint,
+    backgroundColor: colors.textFaint,
+    boxShadow: 'none',
+  },
+  quiet: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingVertical: 6,
+    paddingLeft: 4,
+    paddingRight: 2,
+  },
+  // Smaller than the other dots, on the same line.
+  quietDot: {
+    left: -27,
+    width: 14,
+    height: 14,
+    borderColor: 'rgba(102, 116, 135, 0.45)',
+  },
+  quietText: {
+    flex: 1,
+    fontFamily: fonts.bodyBold,
+    fontSize: 15,
+    color: colors.textMuted,
+  },
+  logIt: {
+    paddingVertical: 6,
+    paddingHorizontal: 13,
+    borderRadius: 99,
+    backgroundColor: colors.surfaceMuted,
+  },
+  logItText: {
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 13,
+    color: colors.text,
+  },
+  letGo: {
+    marginTop: 8,
+    textAlign: 'center',
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 13,
+    color: colors.textMuted,
   },
   card: {
     flexDirection: 'row',

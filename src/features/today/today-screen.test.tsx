@@ -95,8 +95,12 @@ test('a done step can be opened from its chip and undone', async () => {
   await fireEvent.press(screen.getByText('Breakfast logged'));
   await fireEvent.press(screen.getByText('Undo'));
 
-  expect(screen.getByText('Snap breakfast')).toBeOnTheScreen();
+  // It's past breakfast time, so it waits as a quiet line.
+  expect(screen.getByText('Breakfast · log it later')).toBeOnTheScreen();
   expect(screen.getByText('1,370 / 1,500')).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Log it'));
+  expect(screen.getByText('Breakfast logged')).toBeOnTheScreen();
 });
 
 test('another step can be opened instead', async () => {
@@ -131,4 +135,90 @@ test('the stretch shows its moves', async () => {
 
   expect(screen.getByText("Child's pose")).toBeOnTheScreen();
   expect(screen.getByText('No equipment. The floor or your bed is fine.')).toBeOnTheScreen();
+});
+
+// Development builds open Today on other days from a long press on the avatar.
+async function tryDay(name: string) {
+  await render(<TodayScreen />);
+  await fireEvent(screen.getByText('A'), 'longPress');
+  await fireEvent.press(screen.getByText(name));
+}
+
+test('a meal whose time has passed waits as a quiet line', async () => {
+  await tryDay('Breakfast slipped by');
+
+  expect(screen.getByText('Breakfast · log it later')).toBeOnTheScreen();
+  expect(screen.getByText('Start workout')).toBeOnTheScreen();
+  await wait(700);
+  expect(
+    screen.getByText("Sage: Breakfast slipped by? All good. I'll catch you at dinner."),
+  ).toBeOnTheScreen();
+});
+
+test('late at night, the stretch can be let go', async () => {
+  await tryDay('Too tired to stretch');
+
+  await fireEvent.press(screen.getByText('Not tonight'));
+  await wait(1100);
+  expect(screen.getByText('Stretch · skipped')).toBeOnTheScreen();
+  // No points lost, and none earned.
+  expect(screen.getByText('1,600 / 2,000')).toBeOnTheScreen();
+});
+
+test("yesterday's missed workout can be done today", async () => {
+  await tryDay("Yesterday's workout didn't happen");
+  expect(screen.queryByText('Start workout')).not.toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Do it today'));
+  expect(screen.queryByText('Do it today')).not.toBeOnTheScreen();
+  expect(screen.getByText('Start workout')).toBeOnTheScreen();
+  expect(screen.getByText('Rex: Push Day A is on for today.')).toBeOnTheScreen();
+});
+
+test('or moved, from Other options', async () => {
+  await tryDay("Yesterday's workout didn't happen");
+
+  await fireEvent.press(screen.getByText('Other options'));
+  await fireEvent.press(screen.getByText('Move it to Thursday'));
+  // It happens once the sheet is out of the way.
+  await wait(260);
+  expect(screen.queryByText('Do it today')).not.toBeOnTheScreen();
+  expect(
+    screen.getByText("Rex: Moved to Thursday. I'll remind you that morning."),
+  ).toBeOnTheScreen();
+});
+
+test('a rest day has nothing to tick', async () => {
+  await tryDay('Rest day');
+
+  expect(
+    screen.getByText('Nothing to tick today. Rest days count toward your streak.'),
+  ).toBeOnTheScreen();
+  expect(screen.getByText('Easy walk · optional')).toBeOnTheScreen();
+  expect(screen.queryByText('Push Day A')).not.toBeOnTheScreen();
+  expect(screen.getByText('5-week streak')).toBeOnTheScreen();
+  expect(screen.getByText('What rest days do for your muscles')).toBeOnTheScreen();
+});
+
+test('coming back after time away eases in', async () => {
+  await tryDay('Back after 12 days');
+  expect(screen.getByText('New streak · week 1')).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Ease back in'));
+  expect(screen.getByText('Bench 30 lb · lighter to start')).toBeOnTheScreen();
+  expect(screen.getByText("Today's workout · 35 min")).toBeOnTheScreen();
+});
+
+test('on a break, meals are optional until the plan is back on', async () => {
+  await tryDay('On a break');
+
+  expect(screen.getByText('Breakfast · optional')).toBeOnTheScreen();
+  expect(screen.getByText('Streak on hold')).toBeOnTheScreen();
+  expect(screen.getByText('120 pts to Level 5. Your level waits for you.')).toBeOnTheScreen();
+  expect(screen.queryByText('Push Day A')).not.toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Resume now'));
+  expect(screen.getByText('Snap breakfast')).toBeOnTheScreen();
+  expect(screen.getByText('Push Day A')).toBeOnTheScreen();
+  expect(screen.getByText('4-week streak')).toBeOnTheScreen();
 });
