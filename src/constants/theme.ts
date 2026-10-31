@@ -33,6 +33,48 @@ export const coachColors = {
   luna: { wash: '#ECE6FF', ink: '#7A5CE6', shade: '#5E42C7' },
 } as const;
 
+/** The level card's badge and progress bar. */
+export const levelColors = { fill: '#7A5CE6', track: 'rgba(122, 92, 230, 0.16)' } as const;
+
+/**
+ * The sky at the top of Today, one set per time of day: `sky`, `far` and `near` hills, the
+ * sun (or moon), and `ink` / `inkSoft` for the greeting written on it.
+ */
+export const skyColors = {
+  morning: {
+    sky: '#DCEFFF',
+    far: '#B9E4C6',
+    near: '#93D5AB',
+    sun: '#FFC94D',
+    ink: '#234E7D',
+    inkSoft: '#4F77A3',
+  },
+  day: {
+    sky: '#CFE7FF',
+    far: '#AEDFBD',
+    near: '#82CC9C',
+    sun: '#FFC23D',
+    ink: '#234E7D',
+    inkSoft: '#4F77A3',
+  },
+  sunset: {
+    sky: '#FFE4D4',
+    far: '#D7DDB0',
+    near: '#AFCF9C',
+    sun: '#FF9F68',
+    ink: '#7A3E2C',
+    inkSoft: '#9E604C',
+  },
+  night: {
+    sky: '#2B3668',
+    far: '#38497F',
+    near: '#283A66',
+    sun: '#FFE7A3',
+    ink: '#FFFFFF',
+    inkSoft: 'rgba(255, 255, 255, 0.74)',
+  },
+} as const;
+
 /**
  * Each weight is its own font family: Android ignores `fontWeight` for custom fonts.
  * Names must match the fonts loaded in src/app/_layout.tsx.
