@@ -62,3 +62,9 @@ export const radius = {
   button: 18,
   pill: 999,
 } as const;
+
+/** The bottom bar: the tint behind the open tab, and the raised Form check button. */
+export const tabColors = {
+  active: 'rgba(63, 109, 243, 0.12)',
+  formCheck: '#FF9254',
+} as const;
