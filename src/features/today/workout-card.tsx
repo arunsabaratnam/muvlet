@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { type AnimatedRef } from 'react-native-reanimated';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { colors, fonts } from '@/constants/theme';
 
@@ -26,15 +25,6 @@ export function WorkoutCard({ step, cardRef, onStart, onPreview }: WorkoutCardPr
       {/* The buttons inside stay their own targets for screen readers. */}
       <Press accessible={false} onPress={onPreview} style={styles.shadow}>
         <View style={styles.card}>
-          <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
-            <Defs>
-              <LinearGradient id="workout" x1="0.18" y1="0.12" x2="0.82" y2="0.88">
-                <Stop offset="0" stopColor="#5B8CFF" />
-                <Stop offset="0.7" stopColor={colors.primary} />
-              </LinearGradient>
-            </Defs>
-            <Rect width="100%" height="100%" fill="url(#workout)" />
-          </Svg>
           <View style={styles.glow} />
           <View style={styles.face}>
             <CoachFace coach={step.coach} size={72} zoom={0.75} tint="rgba(255, 255, 255, 0.2)" />
@@ -72,6 +62,9 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderRadius: 24,
     overflow: 'hidden',
+    // Painted by the card itself so it always fills it, however tall the card grows.
+    backgroundColor: colors.primary,
+    experimental_backgroundImage: `linear-gradient(135deg, #5B8CFF 15%, ${colors.primary} 70%)`,
   },
   glow: {
     position: 'absolute',
