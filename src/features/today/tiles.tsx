@@ -6,17 +6,16 @@ import Animated, {
   useReducedMotion,
   useSharedValue,
   withTiming,
-  ZoomIn,
 } from 'react-native-reanimated';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { colors, fonts, tileColors } from '@/constants/theme';
 
 import type { WeekDay } from './day';
+import { SETTLE } from './day-path';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const RING = 2 * Math.PI * 15;
-const POP = ZoomIn.springify().damping(11).stiffness(260);
 
 type TilesProps = {
   protein: { left: number; share: number };
@@ -64,8 +63,8 @@ export function Tiles({ protein, week }: TilesProps) {
                   day.state === 'missed' && styles.missed,
                 ]}>
                 {day.state === 'done' ? (
-                  // A workout done today pops in.
-                  <Animated.View entering={day.today ? POP : undefined} style={styles.done}>
+                  // A workout done today settles in.
+                  <Animated.View entering={day.today ? SETTLE : undefined} style={styles.done}>
                     <Svg width={11} height={11} viewBox="0 0 24 24">
                       <Path
                         d="M5 12l5 5 9-10"

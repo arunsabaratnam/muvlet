@@ -18,14 +18,12 @@ import { withCommas } from '@/features/onboarding/plan';
 import { levelFor } from './day';
 
 const EASE = Easing.bezier(0.22, 1, 0.36, 1);
-// A slight overshoot, so the bar settles like it was filled.
-const SPRINGY = Easing.bezier(0.34, 1.56, 0.64, 1);
 
 // "+200" rises over the card and fades.
 const RISE = new Keyframe({
-  0: { opacity: 0, transform: [{ translateY: 10 }, { scale: 0.85 }] },
-  22: { opacity: 1, transform: [{ translateY: 0 }, { scale: 1.08 }] },
-  100: { opacity: 0, transform: [{ translateY: -28 }, { scale: 1 }] },
+  0: { opacity: 0, transform: [{ translateY: 10 }] },
+  22: { opacity: 1, transform: [{ translateY: 0 }] },
+  100: { opacity: 0, transform: [{ translateY: -28 }] },
 }).duration(1200);
 
 const SPARK_COLORS = [
@@ -58,7 +56,7 @@ export function LevelCard({ points, hint, hot = false, gain }: LevelCardProps) {
   const burst = useSharedValue(0);
 
   useEffect(() => {
-    fill.value = reduceMotion ? share : withTiming(share, { duration: 900, easing: SPRINGY });
+    fill.value = reduceMotion ? share : withTiming(share, { duration: 700, easing: EASE });
   }, [share, reduceMotion, fill]);
 
   useEffect(() => {
