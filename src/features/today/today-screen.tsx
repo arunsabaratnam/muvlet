@@ -1,17 +1,36 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { Easing, FadeInDown, useAnimatedRef } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeInDown,
+  useAnimatedRef,
+  useScrollOffset,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, fonts } from '@/constants/theme';
 
+import { AskPill } from './ask-pill';
 import { CoachFace } from './coach-face';
-import { daySections, formatDay, greeting, levelHint, MOCK_NAME, skyPhase } from './day';
-import { DayPath } from './day-path';
+import {
+  daySections,
+  forYou,
+  formatDay,
+  greeting,
+  levelHint,
+  MOCK_NAME,
+  proteinToday,
+  skyPhase,
+  thisWeek,
+} from './day';
+import { DayPath, MOVE } from './day-path';
 import { FloatingStart } from './floating-start';
+import { ForYou } from './for-you';
 import { LevelCard } from './level-card';
 import { PreviewSheet } from './preview-sheet';
 import { Sky } from './sky';
+import { Tiles } from './tiles';
 import { useDay } from './use-day';
 
 export default function TodayScreen() {
@@ -20,7 +39,9 @@ export default function TodayScreen() {
   const { next, say } = day;
   const minutes = now.getHours() * 60 + now.getMinutes();
   const scrollRef = useAnimatedRef();
+  const offset = useScrollOffset(scrollRef);
   const workoutRef = useAnimatedRef();
+  const starting = useSharedValue(false);
   const workout = day.steps.find((step) => step.id === 'workout');
 
   return (
@@ -60,7 +81,7 @@ export default function TodayScreen() {
             />
           </Animated.View>
           {next ? null : (
-            <Animated.View entering={riseIn(0)} style={styles.allDone}>
+            <Animated.View entering={riseIn(0)} layout={MOVE} style={styles.allDone}>
               <CoachFace coach="luna" size={40} />
               <Text style={styles.allDoneText}>
                 {minutes >= 20 * 60
@@ -69,6 +90,16 @@ export default function TodayScreen() {
               </Text>
             </Animated.View>
           )}
+          {/* These slide along as the day above changes size. */}
+          <Animated.View entering={riseIn(2)} layout={MOVE}>
+            <Tiles
+              protein={proteinToday(day.steps)}
+              week={thisWeek(now, workout?.doneAt !== undefined)}
+            />
+          </Animated.View>
+          <Animated.View entering={riseIn(3)} layout={MOVE}>
+            <ForYou reads={forYou(day.steps)} />
+          </Animated.View>
         </View>
       </Animated.ScrollView>
       {workout ? (
@@ -79,10 +110,13 @@ export default function TodayScreen() {
             workout.doneAt === undefined && (day.openId ?? next?.id) === workout.id && !day.preview
           }
           scrollRef={scrollRef}
+          offset={offset}
           cardRef={workoutRef}
+          showing={starting}
           onStart={day.finish}
         />
       ) : null}
+      <AskPill offset={offset} crowded={starting} />
       <PreviewSheet step={day.preview} onStart={day.startPreview} onClose={day.closePreview} />
     </SafeAreaView>
   );

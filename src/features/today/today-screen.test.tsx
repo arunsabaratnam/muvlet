@@ -71,6 +71,21 @@ test('finishing the workout earns its points and folds it into the chip', async 
   // Dinner is next, and now it's about recovery.
   expect(screen.getByText('Aim for 40 g protein after training')).toBeOnTheScreen();
   expect(screen.getByText("Level up! You're a Gym Regular now.")).toBeOnTheScreen();
+  // The week and the reads move on too.
+  expect(screen.getByText('1 of 3 workouts this week')).toBeOnTheScreen();
+  expect(screen.getByText('Why sore muscles are normal')).toBeOnTheScreen();
+});
+
+test('logging dinner counts its protein', async () => {
+  await render(<TodayScreen />);
+  expect(screen.getByText('58 g')).toBeOnTheScreen();
+  expect(screen.getByText('High-protein dinners in 15 minutes')).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Snap your dinner'));
+  await fireEvent.press(screen.getByText('Snap a photo'));
+
+  expect(screen.getByText('20 g')).toBeOnTheScreen();
+  expect(screen.getByText('3 quick high-protein breakfasts')).toBeOnTheScreen();
 });
 
 test('a done step can be opened from its chip and undone', async () => {

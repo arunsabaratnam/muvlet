@@ -41,6 +41,12 @@ export const levelColors = {
   glass: 'rgba(255, 255, 255, 0.25)',
 } as const;
 
+/** Today's tiles: the protein ring, and the planned and done days of the week streak. */
+export const tileColors = {
+  protein: '#FF9254',
+  week: '#FF9254',
+} as const;
+
 /**
  * The sky at the top of Today, one set per time of day: `sky`, `far` and `near` hills, the
  * sun (or moon), and `ink` / `inkSoft` for the greeting written on it.

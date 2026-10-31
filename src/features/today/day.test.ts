@@ -1,4 +1,16 @@
-import { formatDay, greeting, levelFor, levelHint, MOCK_STEPS, nextStep, skyPhase } from './day';
+import {
+  forYou,
+  formatDay,
+  greeting,
+  levelFor,
+  levelHint,
+  MOCK_STEPS,
+  nextStep,
+  proteinToday,
+  skyPhase,
+  thisWeek,
+  type StepId,
+} from './day';
 
 const at = (hours: number, minutes = 0) => new Date(2026, 8, 28, hours, minutes);
 
@@ -35,4 +47,35 @@ test('the level hint says what gets you to the next level', () => {
   expect(levelHint(1600, stretch)).toBe('400 pts to Level 6 · Wind-down stretch +20');
   expect(levelHint(1600)).toBe('400 pts to Level 6');
   expect(levelHint(3000)).toBeUndefined();
+});
+
+const withDone = (...ids: StepId[]) =>
+  MOCK_STEPS.map((step) => (ids.includes(step.id) ? { ...step, doneAt: 20 * 60 } : step));
+
+test('protein left counts the meals logged', () => {
+  expect(proteinToday(MOCK_STEPS).left).toBe(58);
+  expect(proteinToday(withDone('dinner')).left).toBe(20);
+  expect(proteinToday(MOCK_STEPS.map((step) => ({ ...step, doneAt: undefined }))).left).toBe(86);
+});
+
+test('the week shows workouts done and planned, Monday first', () => {
+  const monday = thisWeek(at(17, 45), false);
+  expect(monday.days.map((day) => day.state[0]).join('')).toBe('prprprr');
+  expect(monday.days[0].today).toBe(true);
+  expect(monday.title).toBe('4-week streak');
+  expect(monday.detail).toBe('0 of 3 workouts this week');
+
+  // Friday, after the last workout of the week.
+  const friday = thisWeek(new Date(2026, 9, 2, 19), true);
+  expect(friday.days.map((day) => day.state[0]).join('')).toBe('drdrdrr');
+  expect(friday.title).toBe('5-week streak');
+  expect(friday.detail).toBe('3 of 3 workouts. Week done!');
+});
+
+test('For you follows the day', () => {
+  expect(forYou(MOCK_STEPS).map((read) => read.coach)).toEqual(['axel', 'sage']);
+  expect(forYou(withDone('workout', 'dinner')).map((read) => read.title)).toEqual([
+    'Why sore muscles are normal',
+    '3 quick high-protein breakfasts',
+  ]);
 });

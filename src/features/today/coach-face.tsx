@@ -30,19 +30,28 @@ type CoachFaceProps = {
 };
 
 /** A coach in a tinted circle that crops them a little, as on the step cards. */
-export function CoachFace({ coach, size, tint, zoom = 1 }: CoachFaceProps) {
-  const [x, y, frame] = FRAME[coach];
-  // Zooming keeps the coach centred and their head the same way down the circle.
-  const side = frame / zoom;
-  const left = x + (frame - side) / 2;
-  const top = y + (frame - side) * 0.3;
-  const scale = size / side;
+export function CoachFace({ coach, size, tint, zoom }: CoachFaceProps) {
   return (
     <View
       style={[
         styles.circle,
         { width: size, height: size, backgroundColor: tint ?? coachColors[coach].wash },
       ]}>
+      <CoachStill coach={coach} size={size} zoom={zoom} />
+    </View>
+  );
+}
+
+/** A coach in a square of `size`, with no background. */
+export function CoachStill({ coach, size, zoom = 1 }: Omit<CoachFaceProps, 'tint'>) {
+  const [x, y, frame] = FRAME[coach];
+  // Zooming keeps the coach centred and their head the same way down the square.
+  const side = frame / zoom;
+  const left = x + (frame - side) / 2;
+  const top = y + (frame - side) * 0.3;
+  const scale = size / side;
+  return (
+    <View style={[styles.square, { width: size, height: size }]}>
       <Image
         source={STILLS[coach]}
         style={{
@@ -59,6 +68,9 @@ export function CoachFace({ coach, size, tint, zoom = 1 }: CoachFaceProps) {
 const styles = StyleSheet.create({
   circle: {
     borderRadius: 999,
+    overflow: 'hidden',
+  },
+  square: {
     overflow: 'hidden',
   },
 });
