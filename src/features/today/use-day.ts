@@ -22,6 +22,8 @@ const SHOW_DONE_FOR_MS = 1100;
 const HOT_FOR_MS = 1800;
 const LEVEL_UP_AFTER_MS = 650;
 const LEVEL_UP_FOR_MS = 3400;
+// Starting from a preview waits for its sheet to slide away.
+const START_AFTER_PREVIEW_MS = 260;
 
 const minutesNow = () => {
   const now = new Date();
@@ -37,6 +39,7 @@ export function useDay() {
   const [steps, setSteps] = useState(MOCK_STEPS);
   const [points, setPoints] = useState(MOCK_POINTS);
   const [openId, setOpenId] = useState<StepId>();
+  const [previewId, setPreviewId] = useState<StepId>();
   const [justDone, setJustDone] = useState<StepId>();
   const [expanded, setExpanded] = useState<string[]>([]);
   const [say, setSay] = useState<{ coach: CoachName; text: string }>();
@@ -109,6 +112,11 @@ export function useDay() {
     setOpenId(step.id);
   };
 
+  const startPreview = (step: Step) => {
+    setPreviewId(undefined);
+    later(START_AFTER_PREVIEW_MS, () => finish(step));
+  };
+
   const toggleSection = (title: string) =>
     setExpanded((open) =>
       open.includes(title) ? open.filter((t) => t !== title) : [...open, title],
@@ -119,6 +127,7 @@ export function useDay() {
     points,
     next,
     openId,
+    preview: steps.find((step) => step.id === previewId),
     justDone,
     expanded,
     say,
@@ -126,6 +135,9 @@ export function useDay() {
     gain,
     levelUp,
     open: setOpenId,
+    openPreview: (step: Step) => setPreviewId(step.id),
+    closePreview: () => setPreviewId(undefined),
+    startPreview,
     finish,
     undo,
     toggleSection,

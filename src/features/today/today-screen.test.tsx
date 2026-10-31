@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import 'react-native-gesture-handler/jestSetup';
 
 import TodayScreen from './today-screen';
 
@@ -7,6 +8,10 @@ jest.mock('react-native-reanimated', () => ({
   ...jest.requireActual('react-native-reanimated/mock'),
   useReducedMotion: () => true,
 }));
+jest.mock(
+  'react-native-safe-area-context',
+  () => jest.requireActual('react-native-safe-area-context/jest/mock').default,
+);
 // Rive is native code that doesn't run in Jest.
 jest.mock('@/features/welcome/coach', () => ({ Coach: () => null }));
 
@@ -86,4 +91,29 @@ test('another step can be opened instead', async () => {
 
   expect(screen.getByText('Begin stretch')).toBeOnTheScreen();
   expect(screen.queryByText('Start workout')).not.toBeOnTheScreen();
+});
+
+test('the workout can be looked over first, and started from there', async () => {
+  await render(<TodayScreen />);
+
+  await fireEvent.press(screen.getByText('Preview'));
+  expect(screen.getByText('Workout · 45 min')).toBeOnTheScreen();
+  expect(screen.getByText('Dumbbell bench press')).toBeOnTheScreen();
+  expect(screen.getByText("You'll need dumbbells, a bench and a cable machine.")).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getAllByText('Start workout').at(-1)!);
+  expect(screen.queryByText('Dumbbell bench press')).not.toBeOnTheScreen();
+  // It starts once the sheet is out of the way.
+  await wait(260);
+  expect(screen.getByText('Push Day A done')).toBeOnTheScreen();
+});
+
+test('the stretch shows its moves', async () => {
+  await render(<TodayScreen />);
+
+  await fireEvent.press(screen.getByText('Wind-down stretch'));
+  await fireEvent.press(screen.getByText('See 5 moves'));
+
+  expect(screen.getByText("Child's pose")).toBeOnTheScreen();
+  expect(screen.getByText('No equipment. The floor or your bed is fine.')).toBeOnTheScreen();
 });
