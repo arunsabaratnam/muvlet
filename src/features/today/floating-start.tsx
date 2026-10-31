@@ -34,6 +34,8 @@ type FloatingStartProps = {
   scrollRef: AnimatedRef;
   /** How far Today is scrolled. */
   offset: SharedValue<number>;
+  /** The status bar's height; Today scrolls up behind it. */
+  topInset: number;
   cardRef: AnimatedRef;
   /** Set while it shows, so the Ask pill makes room. */
   showing: SharedValue<boolean>;
@@ -46,6 +48,7 @@ export function FloatingStart({
   live,
   scrollRef,
   offset,
+  topInset,
   cardRef,
   showing,
   onStart,
@@ -64,7 +67,7 @@ export function FloatingStart({
       const view = measure(scrollRef);
       if (!card || !view) return false;
       return (
-        card.pageY + card.height < view.pageY + PAST_TOP ||
+        card.pageY + card.height < view.pageY + topInset + PAST_TOP ||
         card.pageY > view.pageY + view.height - BELOW_BOTTOM
       );
     },
@@ -75,7 +78,7 @@ export function FloatingStart({
       showing.set(on);
       scheduleOnRN(setShown, on);
     },
-    [live, reduceMotion],
+    [live, reduceMotion, topInset],
   );
 
   const style = useAnimatedStyle(() => ({
