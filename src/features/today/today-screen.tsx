@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { Easing, FadeInDown } from 'react-native-reanimated';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, { Easing, FadeInDown, useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, fonts } from '@/constants/theme';
@@ -8,7 +8,9 @@ import { colors, fonts } from '@/constants/theme';
 import { CoachFace } from './coach-face';
 import { daySections, formatDay, greeting, levelHint, MOCK_NAME, skyPhase } from './day';
 import { DayPath } from './day-path';
+import { FloatingStart } from './floating-start';
 import { LevelCard } from './level-card';
+import { PreviewSheet } from './preview-sheet';
 import { Sky } from './sky';
 import { useDay } from './use-day';
 
@@ -17,10 +19,13 @@ export default function TodayScreen() {
   const day = useDay();
   const { next, say } = day;
   const minutes = now.getHours() * 60 + now.getMinutes();
+  const scrollRef = useAnimatedRef();
+  const workoutRef = useAnimatedRef();
+  const workout = day.steps.find((step) => step.id === 'workout');
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <Animated.ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <Sky
           phase={skyPhase(now)}
           date={formatDay(now)}
@@ -46,7 +51,9 @@ export default function TodayScreen() {
               openId={day.openId}
               justDone={day.justDone}
               expanded={day.expanded}
+              workoutRef={workoutRef}
               onOpen={day.open}
+              onPreview={day.openPreview}
               onFinish={day.finish}
               onUndo={day.undo}
               onToggleSection={day.toggleSection}
@@ -63,7 +70,20 @@ export default function TodayScreen() {
             </Animated.View>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
+      {workout ? (
+        <FloatingStart
+          workout={workout}
+          // While its big card is on Today, and no sheet is over it.
+          live={
+            workout.doneAt === undefined && (day.openId ?? next?.id) === workout.id && !day.preview
+          }
+          scrollRef={scrollRef}
+          cardRef={workoutRef}
+          onStart={day.finish}
+        />
+      ) : null}
+      <PreviewSheet step={day.preview} onStart={day.startPreview} onClose={day.closePreview} />
     </SafeAreaView>
   );
 }
@@ -90,8 +110,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  // Room at the bottom for the floating Start.
   content: {
-    paddingBottom: 32,
+    paddingBottom: 80,
   },
   page: {
     gap: 20,

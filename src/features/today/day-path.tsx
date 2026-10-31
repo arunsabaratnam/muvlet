@@ -1,17 +1,19 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
   FadeOut,
   LinearTransition,
   ZoomIn,
+  type AnimatedRef,
 } from 'react-native-reanimated';
 import Svg, { Line, Path } from 'react-native-svg';
 
 import { colors, fonts } from '@/constants/theme';
 
 import { CoachFace } from './coach-face';
-import { doneLabel, stepText, type Section, type Step, type StepId } from './day';
+import { doneLabel, PREVIEWS, stepText, type Section, type Step, type StepId } from './day';
+import { Chevron } from './icons';
 import { Press } from './press';
 import { WorkoutCard } from './workout-card';
 
@@ -29,7 +31,10 @@ type DayPathProps = {
   /** Just finished: shows done for a moment before folding into its section's chip. */
   justDone?: StepId;
   expanded: string[];
+  /** On the big workout card, to tell when it has scrolled out of sight. */
+  workoutRef?: AnimatedRef;
   onOpen: (id: StepId) => void;
+  onPreview: (step: Step) => void;
   onFinish: (step: Step) => void;
   onUndo: (step: Step) => void;
   onToggleSection: (title: string) => void;
@@ -102,13 +107,16 @@ function StepRow({
   next,
   openId,
   justDone,
+  workoutRef,
   onOpen,
+  onPreview,
   onFinish,
   onUndo,
 }: Omit<DayPathProps, 'sections' | 'expanded' | 'onToggleSection'> & { step: Step }) {
   const done = step.doneAt !== undefined;
   const open = step.id === (openId ?? next?.id) || step.id === justDone;
   const { detail } = stepText(step, steps);
+  const preview = PREVIEWS[step.id];
 
   return (
     <>
@@ -120,7 +128,12 @@ function StepRow({
         ) : null}
       </View>
       {open && !done && step.id === 'workout' ? (
-        <WorkoutCard step={step} onStart={() => onFinish(step)} />
+        <WorkoutCard
+          step={step}
+          cardRef={workoutRef}
+          onStart={() => onFinish(step)}
+          onPreview={() => onPreview(step)}
+        />
       ) : open ? (
         <View style={[styles.card, styles.openCard, done && styles.doneCard]}>
           <View style={styles.info}>
@@ -137,12 +150,24 @@ function StepRow({
                 </Text>
               )
             ) : (
-              <Press
-                accessibilityRole="button"
-                onPress={() => onFinish(step)}
-                style={styles.action}>
-                <Text style={styles.actionText}>{step.action}</Text>
-              </Press>
+              <>
+                {preview ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    hitSlop={8}
+                    onPress={() => onPreview(step)}
+                    style={({ pressed }) => [styles.see, pressed && styles.pressed]}>
+                    <Text style={styles.seeText}>{`See ${preview.items.length} moves`}</Text>
+                    <Chevron size={14} color={colors.primary} />
+                  </Pressable>
+                ) : null}
+                <Press
+                  accessibilityRole="button"
+                  onPress={() => onFinish(step)}
+                  style={styles.action}>
+                  <Text style={styles.actionText}>{step.action}</Text>
+                </Press>
+              </>
             )}
           </View>
           <CoachFace coach={step.coach} size={52} />
@@ -295,6 +320,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     color: colors.textMuted,
+  },
+  see: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 3,
+    paddingTop: 6,
+    paddingBottom: 2,
+  },
+  seeText: {
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 13.5,
+    color: colors.primary,
+  },
+  pressed: {
+    opacity: 0.6,
   },
   action: {
     alignItems: 'center',

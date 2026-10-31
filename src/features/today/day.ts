@@ -101,6 +101,49 @@ export const WORKOUT = {
   progress: 'Bench 35 lb · up from 30 lb',
 };
 
+export type Preview = {
+  /** Above the title, e.g. "Workout · 45 min". */
+  kind: string;
+  focus: string;
+  chips: string[];
+  /** A green chip for what went up since last time. */
+  up?: string;
+  items: { name: string; detail: string; up?: string }[];
+  /** What you'll need. */
+  need: string;
+};
+
+/** What's inside a step, for the sheet that previews it before you start. */
+export const PREVIEWS: Partial<Record<StepId, Preview>> = {
+  workout: {
+    kind: 'Workout · 45 min',
+    focus: 'Chest, shoulders and triceps',
+    chips: ['45 min', '5 exercises', '+200 pts'],
+    up: 'Bench up 5 lb',
+    items: [
+      { name: 'Dumbbell bench press', detail: '3 × 8 · 35 lb', up: '5 lb' },
+      { name: 'Seated shoulder press', detail: '3 × 10 · 20 lb' },
+      { name: 'Incline push-up', detail: '3 × 12' },
+      { name: 'Lateral raise', detail: '3 × 12 · 10 lb', up: '2.5 lb' },
+      { name: 'Triceps rope pushdown', detail: '3 × 12 · 30 lb' },
+    ],
+    need: "You'll need dumbbells, a bench and a cable machine.",
+  },
+  stretch: {
+    kind: 'Stretch · 10 min',
+    focus: 'Chest, shoulders and hips',
+    chips: ['10 min', '5 moves', '+20 pts'],
+    items: [
+      { name: 'Doorway chest stretch', detail: '45 s' },
+      { name: 'Cross-body shoulder', detail: '30 s a side' },
+      { name: "Child's pose", detail: '60 s' },
+      { name: 'Figure-four hip', detail: '45 s a side' },
+      { name: 'Lying twist', detail: '30 s a side' },
+    ],
+    need: 'No equipment. The floor or your bed is fine.',
+  },
+};
+
 /** Once the workout is done, dinner is about recovery. */
 export function stepText(step: Step, steps: Step[]) {
   const trained = steps.some((s) => s.id === 'workout' && s.doneAt !== undefined);

@@ -1,58 +1,61 @@
 import { StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import Animated, { type AnimatedRef } from 'react-native-reanimated';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { colors, fonts } from '@/constants/theme';
 
 import { CoachFace } from './coach-face';
 import { WORKOUT, type Step } from './day';
+import { UpArrow } from './icons';
 import { Press } from './press';
 
 type WorkoutCardProps = {
   step: Step;
+  /** Measured to tell when the card has scrolled out of sight. */
+  cardRef?: AnimatedRef;
   onStart: () => void;
+  onPreview: () => void;
 };
 
-/** Push Day A as one big blue card when it's the open step (mockup v38). */
-export function WorkoutCard({ step, onStart }: WorkoutCardProps) {
+/** Push Day A as one big blue card when it's the open step. Tap it to see what's in it. */
+export function WorkoutCard({ step, cardRef, onStart, onPreview }: WorkoutCardProps) {
   return (
-    <View style={styles.shadow}>
-      <View style={styles.card}>
-        <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
-          <Defs>
-            <LinearGradient id="workout" x1="0.18" y1="0.12" x2="0.82" y2="0.88">
-              <Stop offset="0" stopColor="#5B8CFF" />
-              <Stop offset="0.7" stopColor={colors.primary} />
-            </LinearGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill="url(#workout)" />
-        </Svg>
-        <View style={styles.glow} />
-        <View style={styles.face}>
-          <CoachFace coach={step.coach} size={72} zoom={0.75} tint="rgba(255, 255, 255, 0.2)" />
-        </View>
-        <Text style={styles.eyebrow}>{`Today's workout · ${WORKOUT.minutes} min`}</Text>
-        <Text style={styles.title}>{step.title}</Text>
-        <Text style={styles.focus}>{WORKOUT.focus}</Text>
-        <View style={styles.chip}>
-          <Svg width={14} height={14} viewBox="0 0 24 24">
-            <Path
-              d="M12 19V5M6 11l6-6 6 6"
-              stroke="#FFFFFF"
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
+    // Not flattened away on Android, so it can be measured.
+    <Animated.View ref={cardRef} collapsable={false}>
+      {/* The buttons inside stay their own targets for screen readers. */}
+      <Press accessible={false} onPress={onPreview} style={styles.shadow}>
+        <View style={styles.card}>
+          <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+            <Defs>
+              <LinearGradient id="workout" x1="0.18" y1="0.12" x2="0.82" y2="0.88">
+                <Stop offset="0" stopColor="#5B8CFF" />
+                <Stop offset="0.7" stopColor={colors.primary} />
+              </LinearGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill="url(#workout)" />
           </Svg>
-          <Text style={styles.chipText}>{WORKOUT.progress}</Text>
+          <View style={styles.glow} />
+          <View style={styles.face}>
+            <CoachFace coach={step.coach} size={72} zoom={0.75} tint="rgba(255, 255, 255, 0.2)" />
+          </View>
+          <Text style={styles.eyebrow}>{`Today's workout · ${WORKOUT.minutes} min`}</Text>
+          <Text style={styles.title}>{step.title}</Text>
+          <Text style={styles.focus}>{WORKOUT.focus}</Text>
+          <View style={styles.chip}>
+            <UpArrow size={14} color={colors.onPrimary} />
+            <Text style={styles.chipText}>{WORKOUT.progress}</Text>
+          </View>
+          <View style={styles.buttons}>
+            <Press accessibilityRole="button" onPress={onStart} style={styles.start}>
+              <Text style={styles.startText}>{step.action}</Text>
+            </Press>
+            <Press accessibilityRole="button" onPress={onPreview} style={styles.preview}>
+              <Text style={styles.previewText}>Preview</Text>
+            </Press>
+          </View>
         </View>
-        <View style={styles.buttons}>
-          <Press accessibilityRole="button" onPress={onStart} style={styles.start}>
-            <Text style={styles.startText}>{step.action}</Text>
-          </Press>
-        </View>
-      </View>
-    </View>
+      </Press>
+    </Animated.View>
   );
 }
 
@@ -143,5 +146,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: colors.primaryPressed,
+  },
+  preview: {
+    alignItems: 'center',
+    paddingVertical: 9,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.55)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  previewText: {
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.onPrimary,
   },
 });
