@@ -6,10 +6,10 @@ import Animated, {
   useAnimatedReaction,
   useAnimatedStyle,
   useReducedMotion,
-  useScrollOffset,
   useSharedValue,
   withTiming,
   type AnimatedRef,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
@@ -32,14 +32,25 @@ type FloatingStartProps = {
   /** The big workout card is on Today and nothing covers it. */
   live: boolean;
   scrollRef: AnimatedRef;
+  /** How far Today is scrolled. */
+  offset: SharedValue<number>;
   cardRef: AnimatedRef;
+  /** Set while it shows, so the Ask pill makes room. */
+  showing: SharedValue<boolean>;
   onStart: (step: Step) => void;
 };
 
 /** A Start button that floats over Today while the workout card is scrolled out of sight. */
-export function FloatingStart({ workout, live, scrollRef, cardRef, onStart }: FloatingStartProps) {
+export function FloatingStart({
+  workout,
+  live,
+  scrollRef,
+  offset,
+  cardRef,
+  showing,
+  onStart,
+}: FloatingStartProps) {
   const reduceMotion = useReducedMotion();
-  const offset = useScrollOffset(scrollRef);
   const fade = useSharedValue(0);
   const lift = useSharedValue(0);
   const [shown, setShown] = useState(false);
@@ -61,6 +72,7 @@ export function FloatingStart({ workout, live, scrollRef, cardRef, onStart }: Fl
       if (on === was) return;
       fade.set(reduceMotion ? Number(on) : withTiming(Number(on), FADE));
       lift.set(reduceMotion ? Number(on) : withTiming(Number(on), LIFT));
+      showing.set(on);
       scheduleOnRN(setShown, on);
     },
     [live, reduceMotion],
@@ -93,10 +105,11 @@ export function FloatingStart({ workout, live, scrollRef, cardRef, onStart }: Fl
 }
 
 const styles = StyleSheet.create({
+  // Beside the Ask pill, which shrinks to make room.
   float: {
     position: 'absolute',
     left: 16,
-    right: 16,
+    right: 74,
     bottom: 12,
   },
   pill: {

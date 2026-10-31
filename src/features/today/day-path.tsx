@@ -18,7 +18,7 @@ import { Press } from './press';
 import { WorkoutCard } from './workout-card';
 
 // Things slide to where they now belong instead of jumping (mockup FLIP: 460 ms).
-const MOVE = LinearTransition.duration(460).easing(Easing.bezier(0.22, 1, 0.36, 1));
+export const MOVE = LinearTransition.duration(460).easing(Easing.bezier(0.22, 1, 0.36, 1));
 const FOLD = FadeOut.duration(380);
 const POP = ZoomIn.springify().damping(11).stiffness(260);
 
