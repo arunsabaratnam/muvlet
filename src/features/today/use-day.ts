@@ -166,6 +166,13 @@ export function useDay(day: Day, now: number) {
     }
   };
 
+  /** A first workout moved off today, to the next workout day. */
+  const putOff = (step: Step, day: string) => {
+    setSteps((all) => all.filter((s) => s.id !== step.id));
+    setOpenId(undefined);
+    speak('rex', `No problem. Your first workout is ${day}.`, DONE_SAY_FOR_MS);
+  };
+
   const startPreview = (step: Step) => {
     setPreviewId(undefined);
     later(START_AFTER_PREVIEW_MS, () => finish(step));
@@ -199,6 +206,7 @@ export function useDay(day: Day, now: number) {
     skip,
     undo,
     act,
+    putOff,
     toggleSection,
   };
 }

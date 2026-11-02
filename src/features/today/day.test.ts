@@ -8,11 +8,14 @@ import {
   levelFor,
   MOCK_STEPS,
   nextStep,
+  nextWorkoutDay,
   previewOf,
   proteinToday,
   skyPhase,
   thisWeek,
+  tomorrowText,
   WALK,
+  workoutOf,
   type StepId,
 } from './day';
 
@@ -119,6 +122,42 @@ test("a lighter workout previews at last time's weights", () => {
   expect(preview.up).toBeUndefined();
   expect(preview.items[0].detail).toBe('3 × 8 · 30 lb');
   expect(preview.items.some((item) => item.up)).toBe(false);
+});
+
+test('a first workout is shorter, and finds its weights as it goes', () => {
+  const workout = { ...MOCK_STEPS[1], first: true };
+  expect(workoutOf(workout)).toMatchObject({
+    kind: 'Your first workout',
+    minutes: 25,
+    progress: "We'll find your weights as you go",
+  });
+  const preview = previewOf(workout)!;
+  expect(preview.kind).toBe('Workout · 25 min');
+  expect(preview.up).toBeUndefined();
+  expect(preview.items.map((item) => item.detail)).toEqual([
+    '2 × 8 · find your weight',
+    '2 × 10 · find your weight',
+    '2 × 12',
+    '2 × 12 · find your weight',
+    '2 × 12 · find your weight',
+  ]);
+});
+
+test('a first day asks for dinner protein, and says when the first workout is', () => {
+  const evening = MOCK_STEPS.map((step) => ({ ...step, doneAt: undefined }));
+  expect(proteinToday(evening, 0, 40)).toEqual({ left: 40, share: 0 });
+
+  const week = { plan: [0, 2, 4], streak: 0, first: true };
+  const workout = MOCK_STEPS.find((step) => step.id === 'workout');
+  const tonight = thisWeek(at(17, 45), week, workout);
+  expect(tonight.title).toBe('Week 1');
+  expect(tonight.detail).toBe('0 of 3 workouts · first one tonight');
+  // Moved off today, it's Wednesday's.
+  expect(thisWeek(at(17, 45), week).detail).toBe('0 of 3 workouts · first one Wednesday');
+
+  expect(nextWorkoutDay(at(17, 45), week)).toBe('Wednesday');
+  expect(tomorrowText(at(17, 45), week)).toBe('Rest day · next workout Wed');
+  expect(tomorrowText(new Date(2026, 8, 29, 18), week)).toBe('Workout day');
 });
 
 test('For you follows the day', () => {
