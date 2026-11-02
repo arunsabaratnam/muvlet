@@ -22,13 +22,16 @@ import { CoachCard } from './coach-card';
 import { CoachFace } from './coach-face';
 import {
   daySections,
+  FIRST_DAY_PROTEIN,
   forYou,
   formatDay,
   greeting,
   MOCK_NAME,
+  nextWorkoutDay,
   proteinToday,
   skyPhase,
   thisWeek,
+  tomorrowText,
 } from './day';
 import { DayPath, MOVE } from './day-path';
 import { CARD_COACH, DAYS, type Day, type DayKey } from './days';
@@ -44,10 +47,12 @@ import { useDay } from './use-day';
 type TodayScreenProps = {
   /** Whether Today is the tab showing; only then does it set the status bar. */
   focused?: boolean;
+  /** Straight after onboarding: opens on a new member's first day. */
+  first?: boolean;
 };
 
-export default function TodayScreen({ focused = true }: TodayScreenProps) {
-  const [dayKey, setDayKey] = useState<DayKey>('normal');
+export default function TodayScreen({ focused = true, first = false }: TodayScreenProps) {
+  const [dayKey, setDayKey] = useState<DayKey>(first ? 'first' : 'normal');
   const [trying, setTrying] = useState(false);
 
   return (
@@ -93,6 +98,7 @@ function TodayDay({ start, focused, onTryDay }: TodayDayProps) {
   const workoutRef = useAnimatedRef();
   const starting = useSharedValue(false);
   const workout = day.steps.find((step) => step.id === 'workout');
+  const laterDay = nextWorkoutDay(now, day.week);
 
   // Once the page scrolls up to the status bar, a strip of page colour goes behind the clock.
   const [covered, setCovered] = useState(false);
@@ -150,7 +156,11 @@ function TodayDay({ start, focused, onTryDay }: TodayDayProps) {
               onFinish={day.finish}
               onSkip={day.skip}
               onUndo={day.undo}
+              laterDay={laterDay}
+              onLater={(step) => day.putOff(step, laterDay)}
               onToggleSection={day.toggleSection}
+              // A first day ends with a look at tomorrow.
+              tomorrow={start.first ? tomorrowText(now, day.week) : undefined}
             />
           </Animated.View>
           {day.steps.some((step) => step.doneAt === undefined) ? null : (
@@ -166,13 +176,21 @@ function TodayDay({ start, focused, onTryDay }: TodayDayProps) {
           {/* These slide along as the day above changes size. */}
           <Animated.View entering={riseIn(2)} layout={MOVE}>
             <Tiles
-              protein={proteinToday(day.steps, start.protein)}
+              // A first day starts in the evening, so it asks only for dinner's protein.
+              protein={proteinToday(
+                day.steps,
+                start.protein,
+                start.first ? FIRST_DAY_PROTEIN : undefined,
+              )}
               week={thisWeek(now, day.week, workout)}
             />
           </Animated.View>
-          <Animated.View entering={riseIn(3)} layout={MOVE}>
-            <ForYou reads={forYou(day.steps, day.paused)} />
-          </Animated.View>
+          {/* A first day keeps to the plan; reads come later. */}
+          {start.first ? null : (
+            <Animated.View entering={riseIn(3)} layout={MOVE}>
+              <ForYou reads={forYou(day.steps, day.paused)} />
+            </Animated.View>
+          )}
         </View>
       </Animated.ScrollView>
       <Animated.View

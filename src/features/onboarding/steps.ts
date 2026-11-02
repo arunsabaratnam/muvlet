@@ -95,10 +95,13 @@ export function progress(id: StepId) {
   return question < 0 ? 1 : (question + 1) / (QUESTIONS.length + 1);
 }
 
-/** Moves on from a step: to the next one (or `next`), or out to Today with no way back. */
+/**
+ * Moves on from a step: to the next one (or `next`), or out to Today with no way back, where
+ * a new member's first day starts.
+ */
 export function goOn(from: StepId, next = STEPS[from].next) {
   if (next) router.push(`/onboarding/${next}`);
-  else router.replace('/today');
+  else router.replace({ pathname: '/today', params: { first: '1' } });
 }
 
 /** Each goal takes the colour of the coach it fits, on its row and on the progress bar. */

@@ -14,10 +14,20 @@ type WorkoutCardProps = {
   cardRef?: AnimatedRef;
   onStart: () => void;
   onPreview: () => void;
+  /** On a first workout: moves it to `laterDay`. */
+  onLater?: () => void;
+  laterDay?: string;
 };
 
 /** Push Day A as one big blue card when it's the open step. Tap it to see what's in it. */
-export function WorkoutCard({ step, cardRef, onStart, onPreview }: WorkoutCardProps) {
+export function WorkoutCard({
+  step,
+  cardRef,
+  onStart,
+  onPreview,
+  onLater,
+  laterDay,
+}: WorkoutCardProps) {
   const workout = workoutOf(step);
   return (
     // Not flattened away on Android, so it can be measured.
@@ -29,11 +39,11 @@ export function WorkoutCard({ step, cardRef, onStart, onPreview }: WorkoutCardPr
           <View style={styles.face}>
             <CoachFace coach={step.coach} size={72} zoom={0.75} tint="rgba(255, 255, 255, 0.2)" />
           </View>
-          <Text style={styles.eyebrow}>{`Today's workout · ${workout.minutes} min`}</Text>
+          <Text style={styles.eyebrow}>{`${workout.kind} · ${workout.minutes} min`}</Text>
           <Text style={styles.title}>{step.title}</Text>
           <Text style={styles.focus}>{workout.focus}</Text>
           <View style={styles.chip}>
-            <UpArrow size={14} color={colors.onPrimary} />
+            {step.first ? null : <UpArrow size={14} color={colors.onPrimary} />}
             <Text style={styles.chipText}>{workout.progress}</Text>
           </View>
           <View style={styles.buttons}>
@@ -44,6 +54,15 @@ export function WorkoutCard({ step, cardRef, onStart, onPreview }: WorkoutCardPr
               <Text style={styles.previewText}>Preview</Text>
             </Press>
           </View>
+          {onLater && laterDay ? (
+            <Text
+              accessibilityRole="button"
+              onPress={onLater}
+              suppressHighlighting
+              style={styles.later}>
+              {`Not tonight? Move it to ${laterDay}`}
+            </Text>
+          ) : null}
         </View>
       </Press>
     </Animated.View>
@@ -155,5 +174,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: colors.onPrimary,
+  },
+  later: {
+    alignSelf: 'center',
+    marginTop: 10,
+    fontFamily: fonts.bodyExtraBold,
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.82)',
   },
 });
