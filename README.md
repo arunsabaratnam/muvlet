@@ -129,3 +129,7 @@ Meeting notes go in `docs/meetings/YYYY-MM-DD.md`, one file per meeting. Copy `d
 
 - [Meeting notes](docs/meetings/): team discussions and decisions, one file per meeting.
 - [Decisions](docs/decisions/): what we decided and why, one file per decision.
+
+### Meal photo tracking
+
+The Food tab includes photo capture, local food recognition, quantity adjustment and estimated nutrition. See [setup, architecture and limitations](docs/meal-photo-tracking.md). A new development build is required for the added native libraries.

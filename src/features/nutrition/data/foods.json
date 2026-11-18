@@ -1,0 +1,1411 @@
+{
+  "source": "USDA FoodData Central — SR Legacy, April 2018",
+  "downloadUrl": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+  "archiveSha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+  "basis": "100 g edible portion",
+  "foods": [
+    {
+      "id": "171477",
+      "group": "Poulet",
+      "label": "Blanc de poulet rôti, viande sans peau",
+      "usdaDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171477/nutrients",
+      "per100g": {
+        "fat": 3.57,
+        "carbs": 0.0,
+        "calories": 165.0,
+        "protein": 31.02
+      },
+      "portions": [
+        {
+          "description": "1 cup, chopped or diced",
+          "grams": 140.0
+        },
+        {
+          "description": "1 unit (yield from 1 lb ready-to-cook chicken)",
+          "grams": 52.0
+        },
+        {
+          "description": "0.5 breast, bone and skin removed",
+          "grams": 86.0
+        }
+      ]
+    },
+    {
+      "id": "171078",
+      "group": "Poulet",
+      "label": "Blanc de poulet frit, viande sans peau",
+      "usdaDescription": "Chicken, broilers or fryers, breast, meat only, cooked, fried",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171078/nutrients",
+      "per100g": {
+        "protein": 33.44,
+        "fat": 4.71,
+        "carbs": 0.51,
+        "calories": 187.0
+      },
+      "portions": [
+        {
+          "description": "1 unit (yield from 1 lb ready-to-cook chicken)",
+          "grams": 52.0
+        },
+        {
+          "description": "0.5 breast, bone and skin removed",
+          "grams": 86.0
+        }
+      ]
+    },
+    {
+      "id": "171077",
+      "group": "Poulet",
+      "label": "Blanc de poulet cru, sans peau ni os",
+      "usdaDescription": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171077/nutrients",
+      "per100g": {
+        "fat": 2.62,
+        "calories": 120.0,
+        "protein": 22.5,
+        "carbs": 0.0
+      },
+      "portions": [
+        {
+          "description": "4 oz",
+          "grams": 113.0
+        },
+        {
+          "description": "1 piece",
+          "grams": 272.0
+        },
+        {
+          "description": "1 package",
+          "grams": 926.0
+        }
+      ]
+    },
+    {
+      "id": "168878",
+      "group": "Riz",
+      "label": "Riz blanc long grain, cuit",
+      "usdaDescription": "Rice, white, long-grain, regular, enriched, cooked",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/168878/nutrients",
+      "per100g": {
+        "protein": 2.69,
+        "fat": 0.28,
+        "carbs": 28.17,
+        "calories": 130.0
+      },
+      "portions": [
+        {
+          "description": "1 cup",
+          "grams": 158.0
+        }
+      ]
+    },
+    {
+      "id": "168877",
+      "group": "Riz",
+      "label": "Riz blanc long grain, cru",
+      "usdaDescription": "Rice, white, long-grain, regular, raw, enriched",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/168877/nutrients",
+      "per100g": {
+        "fat": 0.66,
+        "carbs": 79.95,
+        "calories": 365.0,
+        "protein": 7.13
+      },
+      "portions": [
+        {
+          "description": "1 cup",
+          "grams": 185.0
+        }
+      ]
+    },
+    {
+      "id": "169967",
+      "group": "Brocoli",
+      "label": "Brocoli bouilli, égoutté, sans sel",
+      "usdaDescription": "Broccoli, cooked, boiled, drained, without salt",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/169967/nutrients",
+      "per100g": {
+        "fat": 0.41,
+        "protein": 2.38,
+        "carbs": 7.18,
+        "calories": 35.0
+      },
+      "portions": [
+        {
+          "description": "0.5 cup, chopped",
+          "grams": 78.0
+        },
+        {
+          "description": "1 stalk, large (11\"-12\" long)",
+          "grams": 280.0
+        },
+        {
+          "description": "1 stalk, medium (7-1/2\" - 8\" long)",
+          "grams": 180.0
+        },
+        {
+          "description": "1 stalk, small (5\" long)",
+          "grams": 140.0
+        },
+        {
+          "description": "1 spear (about 5\" long)",
+          "grams": 37.0
+        }
+      ]
+    },
+    {
+      "id": "170379",
+      "group": "Brocoli",
+      "label": "Brocoli cru",
+      "usdaDescription": "Broccoli, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/170379/nutrients",
+      "per100g": {
+        "carbs": 6.64,
+        "calories": 34.0,
+        "fat": 0.37,
+        "protein": 2.82
+      },
+      "portions": [
+        {
+          "description": "1 cup chopped",
+          "grams": 91.0
+        },
+        {
+          "description": "1 bunch",
+          "grams": 608.0
+        },
+        {
+          "description": "1 spear (about 5\" long)",
+          "grams": 31.0
+        },
+        {
+          "description": "1 stalk",
+          "grams": 151.0
+        },
+        {
+          "description": "0.5 cup, chopped or diced",
+          "grams": 44.0
+        },
+        {
+          "description": "1 NLEA serving",
+          "grams": 148.0
+        }
+      ]
+    },
+    {
+      "id": "169737",
+      "group": "Pâtes",
+      "label": "Pâtes cuites, sans sel ajouté",
+      "usdaDescription": "Pasta, cooked, enriched, without added salt",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/169737/nutrients",
+      "per100g": {
+        "fat": 0.93,
+        "protein": 5.8,
+        "carbs": 30.86,
+        "calories": 158.0
+      },
+      "portions": [
+        {
+          "description": "1 cup spaghetti not packed",
+          "grams": 124.0
+        },
+        {
+          "description": "1 cup spaghetti packed",
+          "grams": 151.0
+        },
+        {
+          "description": "1 cup elbows not packed",
+          "grams": 120.0
+        },
+        {
+          "description": "1 cup elbows packed",
+          "grams": 132.0
+        },
+        {
+          "description": "1 cup penne",
+          "grams": 107.0
+        },
+        {
+          "description": "1 cup farfalle",
+          "grams": 107.0
+        },
+        {
+          "description": "1 cup rotini",
+          "grams": 107.0
+        },
+        {
+          "description": "1 cup shells",
+          "grams": 105.0
+        },
+        {
+          "description": "1 cup lasagne",
+          "grams": 116.0
+        }
+      ]
+    },
+    {
+      "id": "169736",
+      "group": "Pâtes",
+      "label": "Pâtes sèches",
+      "usdaDescription": "Pasta, dry, enriched",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/169736/nutrients",
+      "per100g": {
+        "carbs": 74.67,
+        "calories": 371.0,
+        "fat": 1.51,
+        "protein": 13.04
+      },
+      "portions": [
+        {
+          "description": "1 cup spaghetti",
+          "grams": 91.0
+        },
+        {
+          "description": "2 oz",
+          "grams": 57.0
+        },
+        {
+          "description": "1 cup elbows",
+          "grams": 122.0
+        },
+        {
+          "description": "1 cup penne",
+          "grams": 95.0
+        },
+        {
+          "description": "1 cup farfalle",
+          "grams": 81.0
+        },
+        {
+          "description": "1 cup rotini",
+          "grams": 96.0
+        },
+        {
+          "description": "1 cup shells",
+          "grams": 64.0
+        },
+        {
+          "description": "1 cup lasagna",
+          "grams": 90.0
+        }
+      ]
+    },
+    {
+      "id": "175168",
+      "group": "Saumon",
+      "label": "Saumon atlantique d’élevage, cuit à chaleur sèche",
+      "usdaDescription": "Fish, salmon, Atlantic, farmed, cooked, dry heat",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/175168/nutrients",
+      "per100g": {
+        "fat": 12.35,
+        "carbs": 0.0,
+        "protein": 22.1,
+        "calories": 206.0
+      },
+      "portions": [
+        {
+          "description": "3 oz",
+          "grams": 85.0
+        },
+        {
+          "description": "0.5 fillet",
+          "grams": 178.0
+        }
+      ]
+    },
+    {
+      "id": "175167",
+      "group": "Saumon",
+      "label": "Saumon atlantique d’élevage, cru",
+      "usdaDescription": "Fish, salmon, Atlantic, farmed, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/175167/nutrients",
+      "per100g": {
+        "calories": 208.0,
+        "fat": 13.42,
+        "protein": 20.42,
+        "carbs": 0.0
+      },
+      "portions": [
+        {
+          "description": "3 oz",
+          "grams": 85.0
+        },
+        {
+          "description": "0.5 fillet",
+          "grams": 198.0
+        }
+      ]
+    },
+    {
+      "id": "171794",
+      "group": "Bœuf",
+      "label": "Bœuf haché 90 % maigre, émietté et cuit à la poêle",
+      "usdaDescription": "Beef, ground, 90% lean meat / 10% fat, crumbles, cooked, pan-browned",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171794/nutrients",
+      "per100g": {
+        "calories": 230.0,
+        "carbs": 0.0,
+        "protein": 28.45,
+        "fat": 12.04
+      },
+      "portions": [
+        {
+          "description": "3 oz",
+          "grams": 85.0
+        },
+        {
+          "description": "1 portion ( yield from 1/2 lb raw meat )",
+          "grams": 154.0
+        }
+      ]
+    },
+    {
+      "id": "174030",
+      "group": "Bœuf",
+      "label": "Bœuf haché 90 % maigre, cru",
+      "usdaDescription": "Beef, ground, 90% lean meat / 10% fat, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/174030/nutrients",
+      "per100g": {
+        "fat": 10.0,
+        "carbs": 0.0,
+        "protein": 20.0,
+        "calories": 176.0
+      },
+      "portions": [
+        {
+          "description": "4 oz",
+          "grams": 113.0
+        }
+      ]
+    },
+    {
+      "id": "171956",
+      "group": "Poisson",
+      "label": "Morue atlantique, cuite à chaleur sèche",
+      "usdaDescription": "Fish, cod, Atlantic, cooked, dry heat",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171956/nutrients",
+      "per100g": {
+        "calories": 105.0,
+        "fat": 0.86,
+        "carbs": 0.0,
+        "protein": 22.83
+      },
+      "portions": [
+        {
+          "description": "3 oz",
+          "grams": 85.0
+        },
+        {
+          "description": "1 fillet",
+          "grams": 180.0
+        }
+      ]
+    },
+    {
+      "id": "171955",
+      "group": "Poisson",
+      "label": "Morue atlantique, crue",
+      "usdaDescription": "Fish, cod, Atlantic, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171955/nutrients",
+      "per100g": {
+        "calories": 82.0,
+        "protein": 17.81,
+        "fat": 0.67,
+        "carbs": 0.0
+      },
+      "portions": [
+        {
+          "description": "3 oz",
+          "grams": 85.0
+        },
+        {
+          "description": "1 fillet",
+          "grams": 231.0
+        }
+      ]
+    },
+    {
+      "id": "173424",
+      "group": "Œuf",
+      "label": "Œuf entier dur",
+      "usdaDescription": "Egg, whole, cooked, hard-boiled",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/173424/nutrients",
+      "per100g": {
+        "calories": 155.0,
+        "protein": 12.58,
+        "fat": 10.61,
+        "carbs": 1.12
+      },
+      "portions": [
+        {
+          "description": "1 cup, chopped",
+          "grams": 136.0
+        },
+        {
+          "description": "1 tbsp",
+          "grams": 8.5
+        },
+        {
+          "description": "1 large",
+          "grams": 50.0
+        }
+      ]
+    },
+    {
+      "id": "173423",
+      "group": "Œuf",
+      "label": "Œuf entier frit",
+      "usdaDescription": "Egg, whole, cooked, fried",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/173423/nutrients",
+      "per100g": {
+        "protein": 13.61,
+        "fat": 14.84,
+        "carbs": 0.83,
+        "calories": 196.0
+      },
+      "portions": [
+        {
+          "description": "1 large",
+          "grams": 46.0
+        }
+      ]
+    },
+    {
+      "id": "170440",
+      "group": "Pomme de terre",
+      "label": "Pomme de terre bouillie sans peau, sans sel",
+      "usdaDescription": "Potatoes, boiled, cooked without skin, flesh, without salt",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/170440/nutrients",
+      "per100g": {
+        "carbs": 20.01,
+        "calories": 86.0,
+        "fat": 0.1,
+        "protein": 1.71
+      },
+      "portions": [
+        {
+          "description": "0.5 cup",
+          "grams": 78.0
+        },
+        {
+          "description": "1 large (3\" to 4-1/4\" dia.)",
+          "grams": 300.0
+        },
+        {
+          "description": "1 medium (2-1/4\" to 3-1/4\" dia.)",
+          "grams": 167.0
+        },
+        {
+          "description": "1 small (1-3/4\" to 2-1/2\" dia.)",
+          "grams": 125.0
+        }
+      ]
+    },
+    {
+      "id": "170698",
+      "group": "Frites",
+      "label": "Frites de restauration rapide, huile végétale",
+      "usdaDescription": "Fast foods, potato, french fried in vegetable oil",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/170698/nutrients",
+      "per100g": {
+        "protein": 3.43,
+        "fat": 14.73,
+        "carbs": 41.44,
+        "calories": 312.0
+      },
+      "portions": [
+        {
+          "description": "1 serving small",
+          "grams": 71.0
+        },
+        {
+          "description": "1 serving medium",
+          "grams": 117.0
+        },
+        {
+          "description": "1 serving large",
+          "grams": 154.0
+        }
+      ]
+    },
+    {
+      "id": "170393",
+      "group": "Carotte",
+      "label": "Carotte crue",
+      "usdaDescription": "Carrots, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/170393/nutrients",
+      "per100g": {
+        "protein": 0.93,
+        "fat": 0.24,
+        "carbs": 9.58,
+        "calories": 41.0
+      },
+      "portions": [
+        {
+          "description": "1 cup chopped",
+          "grams": 128.0
+        },
+        {
+          "description": "1 cup grated",
+          "grams": 110.0
+        },
+        {
+          "description": "1 cup strips or slices",
+          "grams": 122.0
+        },
+        {
+          "description": "1 large (7-1/4\" to 8-/1/2\" long)",
+          "grams": 72.0
+        },
+        {
+          "description": "1 medium",
+          "grams": 61.0
+        },
+        {
+          "description": "1 small (5-1/2\" long)",
+          "grams": 50.0
+        },
+        {
+          "description": "1 slice",
+          "grams": 3.0
+        },
+        {
+          "description": "1 strip large (3\" long)",
+          "grams": 7.0
+        },
+        {
+          "description": "1 strip medium",
+          "grams": 4.0
+        }
+      ]
+    },
+    {
+      "id": "170394",
+      "group": "Carotte",
+      "label": "Carotte bouillie, égouttée, sans sel",
+      "usdaDescription": "Carrots, cooked, boiled, drained, without salt",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/170394/nutrients",
+      "per100g": {
+        "fat": 0.18,
+        "protein": 0.76,
+        "carbs": 8.22,
+        "calories": 35.0
+      },
+      "portions": [
+        {
+          "description": "1 tbsp",
+          "grams": 9.7
+        },
+        {
+          "description": "0.5 cup slices",
+          "grams": 78.0
+        },
+        {
+          "description": "1 carrot",
+          "grams": 46.0
+        }
+      ]
+    },
+    {
+      "id": "170457",
+      "group": "Tomate",
+      "label": "Tomate rouge crue",
+      "usdaDescription": "Tomatoes, red, ripe, raw, year round average",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/170457/nutrients",
+      "per100g": {
+        "carbs": 3.89,
+        "calories": 18.0,
+        "fat": 0.2,
+        "protein": 0.88
+      },
+      "portions": [
+        {
+          "description": "1 cup cherry tomatoes",
+          "grams": 149.0
+        },
+        {
+          "description": "1 cup, chopped or sliced",
+          "grams": 180.0
+        },
+        {
+          "description": "1 Italian tomato",
+          "grams": 62.0
+        },
+        {
+          "description": "1 cherry",
+          "grams": 17.0
+        },
+        {
+          "description": "1 large whole (3\" dia)",
+          "grams": 182.0
+        },
+        {
+          "description": "1 medium whole (2-3/5\" dia)",
+          "grams": 123.0
+        },
+        {
+          "description": "1 slice, medium (1/4\" thick)",
+          "grams": 20.0
+        },
+        {
+          "description": "1 plum tomato",
+          "grams": 62.0
+        },
+        {
+          "description": "1 small whole (2-2/5\" dia)",
+          "grams": 91.0
+        },
+        {
+          "description": "1 slice, thick/large (1/2\" thick)",
+          "grams": 27.0
+        },
+        {
+          "description": "1 wedge (1/4 of medium tomato)",
+          "grams": 31.0
+        },
+        {
+          "description": "1 slice, thin/small",
+          "grams": 15.0
+        },
+        {
+          "description": "1 NLEA serving",
+          "grams": 148.0
+        }
+      ]
+    },
+    {
+      "id": "169247",
+      "group": "Laitue",
+      "label": "Laitue romaine crue",
+      "usdaDescription": "Lettuce, cos or romaine, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/169247/nutrients",
+      "per100g": {
+        "carbs": 3.29,
+        "calories": 17.0,
+        "fat": 0.3,
+        "protein": 1.23
+      },
+      "portions": [
+        {
+          "description": "1 cup shredded",
+          "grams": 47.0
+        },
+        {
+          "description": "1 leaf inner",
+          "grams": 6.0
+        },
+        {
+          "description": "1 leaf outer",
+          "grams": 28.0
+        },
+        {
+          "description": "1 head",
+          "grams": 626.0
+        },
+        {
+          "description": "1 NLEA serving",
+          "grams": 85.0
+        }
+      ]
+    },
+    {
+      "id": "168409",
+      "group": "Concombre",
+      "label": "Concombre cru avec peau",
+      "usdaDescription": "Cucumber, with peel, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/168409/nutrients",
+      "per100g": {
+        "carbs": 3.63,
+        "calories": 15.0,
+        "fat": 0.11,
+        "protein": 0.65
+      },
+      "portions": [
+        {
+          "description": "0.5 cup slices",
+          "grams": 52.0
+        },
+        {
+          "description": "1 cucumber (8-1/4\")",
+          "grams": 301.0
+        }
+      ]
+    },
+    {
+      "id": "171705",
+      "group": "Avocat",
+      "label": "Avocat cru, chair",
+      "usdaDescription": "Avocados, raw, all commercial varieties",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171705/nutrients",
+      "per100g": {
+        "protein": 2.0,
+        "fat": 14.66,
+        "carbs": 8.53,
+        "calories": 160.0
+      },
+      "portions": [
+        {
+          "description": "1 cup, cubes",
+          "grams": 150.0
+        },
+        {
+          "description": "1 cup, pureed",
+          "grams": 230.0
+        },
+        {
+          "description": "1 cup, sliced",
+          "grams": 146.0
+        },
+        {
+          "description": "1 avocado, NS as to Florida or California",
+          "grams": 201.0
+        },
+        {
+          "description": "1 NLEA Serving",
+          "grams": 50.0
+        }
+      ]
+    },
+    {
+      "id": "172688",
+      "group": "Pain",
+      "label": "Pain de blé entier du commerce",
+      "usdaDescription": "Bread, whole-wheat, commercially prepared",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/172688/nutrients",
+      "per100g": {
+        "fat": 3.5,
+        "carbs": 42.71,
+        "calories": 252.0,
+        "protein": 12.45
+      },
+      "portions": [
+        {
+          "description": "1 slice",
+          "grams": 32.0
+        },
+        {
+          "description": "1 oz",
+          "grams": 28.35
+        }
+      ]
+    },
+    {
+      "id": "173414",
+      "group": "Fromage",
+      "label": "Fromage cheddar",
+      "usdaDescription": "Cheese, cheddar (Includes foods for USDA's Food Distribution Program)",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/173414/nutrients",
+      "per100g": {
+        "carbs": 3.37,
+        "calories": 403.0,
+        "protein": 22.87,
+        "fat": 33.31
+      },
+      "portions": [
+        {
+          "description": "1 cup, diced",
+          "grams": 132.0
+        },
+        {
+          "description": "1 cup, melted",
+          "grams": 244.0
+        },
+        {
+          "description": "1 cup, shredded",
+          "grams": 113.0
+        },
+        {
+          "description": "1 oz",
+          "grams": 28.35
+        },
+        {
+          "description": "1 cubic inch",
+          "grams": 17.0
+        },
+        {
+          "description": "1 slice (1 oz)",
+          "grams": 28.0
+        }
+      ]
+    },
+    {
+      "id": "169251",
+      "group": "Champignon",
+      "label": "Champignon blanc cru",
+      "usdaDescription": "Mushrooms, white, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/169251/nutrients",
+      "per100g": {
+        "fat": 0.34,
+        "protein": 3.09,
+        "carbs": 3.26,
+        "calories": 22.0
+      },
+      "portions": [
+        {
+          "description": "1 cup, pieces or slices",
+          "grams": 70.0
+        },
+        {
+          "description": "1 cup, whole",
+          "grams": 96.0
+        },
+        {
+          "description": "1 large",
+          "grams": 23.0
+        },
+        {
+          "description": "1 medium",
+          "grams": 18.0
+        },
+        {
+          "description": "1 slice",
+          "grams": 6.0
+        },
+        {
+          "description": "1 small",
+          "grams": 10.0
+        },
+        {
+          "description": "0.5 cup pieces",
+          "grams": 35.0
+        }
+      ]
+    },
+    {
+      "id": "169252",
+      "group": "Champignon",
+      "label": "Champignon blanc bouilli, sans sel",
+      "usdaDescription": "Mushrooms, white, cooked, boiled, drained, without salt",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/169252/nutrients",
+      "per100g": {
+        "protein": 2.17,
+        "fat": 0.47,
+        "carbs": 5.29,
+        "calories": 28.0
+      },
+      "portions": [
+        {
+          "description": "1 cup pieces",
+          "grams": 156.0
+        },
+        {
+          "description": "1 tbsp",
+          "grams": 9.8
+        },
+        {
+          "description": "1 mushroom",
+          "grams": 12.0
+        }
+      ]
+    },
+    {
+      "id": "169141",
+      "group": "Haricots verts",
+      "label": "Haricots verts bouillis, égouttés, sans sel",
+      "usdaDescription": "Beans, snap, green, cooked, boiled, drained, without salt",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/169141/nutrients",
+      "per100g": {
+        "carbs": 7.88,
+        "calories": 35.0,
+        "protein": 1.89,
+        "fat": 0.28
+      },
+      "portions": [
+        {
+          "description": "1 cup",
+          "grams": 125.0
+        }
+      ]
+    },
+    {
+      "id": "168525",
+      "group": "Maïs",
+      "label": "Maïs doux jaune bouilli, égoutté, avec sel",
+      "usdaDescription": "Corn, sweet, yellow, cooked, boiled, drained, with salt",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/168525/nutrients",
+      "per100g": {
+        "protein": 3.41,
+        "fat": 1.5,
+        "carbs": 20.98,
+        "calories": 96.0
+      },
+      "portions": [
+        {
+          "description": "1 ear small (5-1/2\" to 6-1/2\" long)",
+          "grams": 89.0
+        },
+        {
+          "description": "1 ear medium (6-3/4\" to 7-1/2\" long)",
+          "grams": 103.0
+        },
+        {
+          "description": "1 ear large (7-3/4\" to 9\" long)",
+          "grams": 118.0
+        },
+        {
+          "description": "1 cup",
+          "grams": 149.0
+        },
+        {
+          "description": "1 baby ear",
+          "grams": 8.0
+        },
+        {
+          "description": "1 ear, yields",
+          "grams": 77.0
+        }
+      ]
+    },
+    {
+      "id": "175180",
+      "group": "Crevette",
+      "label": "Crevettes cuites",
+      "usdaDescription": "Crustaceans, shrimp, cooked",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/175180/nutrients",
+      "per100g": {
+        "protein": 23.98,
+        "fat": 0.28,
+        "carbs": 0.2,
+        "calories": 99.0
+      },
+      "portions": [
+        {
+          "description": "3 oz",
+          "grams": 85.0
+        }
+      ]
+    },
+    {
+      "id": "171970",
+      "group": "Crevette",
+      "label": "Crevettes panées et frites",
+      "usdaDescription": "Crustaceans, shrimp, mixed species, cooked, breaded and fried",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171970/nutrients",
+      "per100g": {
+        "calories": 242.0,
+        "protein": 21.39,
+        "fat": 12.28,
+        "carbs": 11.47
+      },
+      "portions": [
+        {
+          "description": "3 oz",
+          "grams": 85.0
+        },
+        {
+          "description": "4 large",
+          "grams": 30.0
+        }
+      ]
+    },
+    {
+      "id": "170317",
+      "group": "Pizza",
+      "label": "Pizza au fromage, pâte classique, surgelée puis cuite",
+      "usdaDescription": "Pizza, cheese topping, regular crust, frozen, cooked",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/170317/nutrients",
+      "per100g": {
+        "fat": 12.28,
+        "protein": 10.36,
+        "carbs": 29.02,
+        "calories": 268.0
+      },
+      "portions": [
+        {
+          "description": "1 serving 9 servings per 24 oz package",
+          "grams": 81.0
+        },
+        {
+          "description": "1 serving 3 servings per 15.1 oz package",
+          "grams": 151.0
+        },
+        {
+          "description": "1 serving 2 servings per 9.8 oz package",
+          "grams": 146.0
+        },
+        {
+          "description": "1 serving 1 serving per 8 oz box",
+          "grams": 199.0
+        },
+        {
+          "description": "1 package 24 oz pizza",
+          "grams": 727.0
+        },
+        {
+          "description": "1 package 15.1 oz pizza",
+          "grams": 452.0
+        },
+        {
+          "description": "1 package 9.8 oz pizza",
+          "grams": 293.0
+        },
+        {
+          "description": "1 package 8 oz pizza",
+          "grams": 199.0
+        }
+      ]
+    },
+    {
+      "id": "172971",
+      "group": "Saucisse",
+      "label": "Saucisse de porc, précuite puis réchauffée au micro-ondes",
+      "usdaDescription": "Pork sausage, link/patty, fully cooked, microwaved",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/172971/nutrients",
+      "per100g": {
+        "protein": 15.12,
+        "fat": 41.66,
+        "carbs": 0.62,
+        "calories": 438.0
+      },
+      "portions": [
+        {
+          "description": "1 patty",
+          "grams": 30.0
+        },
+        {
+          "description": "1 link",
+          "grams": 21.0
+        },
+        {
+          "description": "1 serving",
+          "grams": 48.0
+        }
+      ]
+    },
+    {
+      "id": "172448",
+      "group": "Tofu",
+      "label": "Tofu ferme, sulfate de calcium et nigari",
+      "usdaDescription": "Tofu, firm, prepared with calcium sulfate and magnesium chloride (nigari)",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/172448/nutrients",
+      "per100g": {
+        "protein": 9.04,
+        "carbs": 2.85,
+        "calories": 78.0,
+        "fat": 4.17
+      },
+      "portions": [
+        {
+          "description": "0.5 cup",
+          "grams": 126.0
+        },
+        {
+          "description": "0.25 block",
+          "grams": 81.0
+        },
+        {
+          "description": "0.2 block",
+          "grams": 91.0
+        }
+      ]
+    },
+    {
+      "id": "172451",
+      "group": "Tofu",
+      "label": "Tofu frit",
+      "usdaDescription": "Tofu, fried",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/172451/nutrients",
+      "per100g": {
+        "carbs": 8.86,
+        "calories": 270.0,
+        "protein": 18.82,
+        "fat": 20.18
+      },
+      "portions": [
+        {
+          "description": "1 oz",
+          "grams": 28.35
+        },
+        {
+          "description": "1 piece",
+          "grams": 13.0
+        }
+      ]
+    },
+    {
+      "id": "171688",
+      "group": "Pomme",
+      "label": "Pomme crue avec peau",
+      "usdaDescription": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171688/nutrients",
+      "per100g": {
+        "carbs": 13.81,
+        "calories": 52.0,
+        "fat": 0.17,
+        "protein": 0.26
+      },
+      "portions": [
+        {
+          "description": "1 cup, quartered or chopped",
+          "grams": 125.0
+        },
+        {
+          "description": "1 cup slices",
+          "grams": 109.0
+        },
+        {
+          "description": "1 large (3-1/4\" dia)",
+          "grams": 223.0
+        },
+        {
+          "description": "1 medium (3\" dia)",
+          "grams": 182.0
+        },
+        {
+          "description": "1 small (2-3/4\" dia)",
+          "grams": 149.0
+        },
+        {
+          "description": "1 extra small (2-1/2\" dia)",
+          "grams": 101.0
+        },
+        {
+          "description": "1 NLEA serving",
+          "grams": 242.0
+        }
+      ]
+    },
+    {
+      "id": "173944",
+      "group": "Banane",
+      "label": "Banane crue, chair",
+      "usdaDescription": "Bananas, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/173944/nutrients",
+      "per100g": {
+        "carbs": 22.84,
+        "calories": 89.0,
+        "protein": 1.09,
+        "fat": 0.33
+      },
+      "portions": [
+        {
+          "description": "1 cup, mashed",
+          "grams": 225.0
+        },
+        {
+          "description": "1 cup, sliced",
+          "grams": 150.0
+        },
+        {
+          "description": "1 extra small (less than 6\" long)",
+          "grams": 81.0
+        },
+        {
+          "description": "1 small (6\" to 6-7/8\" long)",
+          "grams": 101.0
+        },
+        {
+          "description": "1 medium (7\" to 7-7/8\" long)",
+          "grams": 118.0
+        },
+        {
+          "description": "1 large (8\" to 8-7/8\" long)",
+          "grams": 136.0
+        },
+        {
+          "description": "1 extra large (9\" or longer)",
+          "grams": 152.0
+        },
+        {
+          "description": "1 NLEA serving",
+          "grams": 126.0
+        }
+      ]
+    },
+    {
+      "id": "167762",
+      "group": "Fraise",
+      "label": "Fraises crues",
+      "usdaDescription": "Strawberries, raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/167762/nutrients",
+      "per100g": {
+        "fat": 0.3,
+        "protein": 0.67,
+        "carbs": 7.68,
+        "calories": 32.0
+      },
+      "portions": [
+        {
+          "description": "1 cup, halves",
+          "grams": 152.0
+        },
+        {
+          "description": "1 cup, pureed",
+          "grams": 232.0
+        },
+        {
+          "description": "1 cup, sliced",
+          "grams": 166.0
+        },
+        {
+          "description": "1 cup, whole",
+          "grams": 144.0
+        },
+        {
+          "description": "1 extra large (1-5/8\" dia)",
+          "grams": 27.0
+        },
+        {
+          "description": "1 large (1-3/8\" dia)",
+          "grams": 18.0
+        },
+        {
+          "description": "1 medium (1-1/4\" dia)",
+          "grams": 12.0
+        },
+        {
+          "description": "1 pint as purchased, yields",
+          "grams": 357.0
+        },
+        {
+          "description": "1 small (1\" dia)",
+          "grams": 7.0
+        },
+        {
+          "description": "1 NLEA serving",
+          "grams": 147.0
+        }
+      ]
+    },
+    {
+      "id": "169097",
+      "group": "Orange",
+      "label": "Orange crue, chair",
+      "usdaDescription": "Oranges, raw, all commercial varieties",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/169097/nutrients",
+      "per100g": {
+        "fat": 0.12,
+        "carbs": 11.75,
+        "calories": 47.0,
+        "protein": 0.94
+      },
+      "portions": [
+        {
+          "description": "1 cup, sections",
+          "grams": 180.0
+        },
+        {
+          "description": "1 large (3-1/16\" dia)",
+          "grams": 184.0
+        },
+        {
+          "description": "1 small (2-3/8\" dia)",
+          "grams": 96.0
+        },
+        {
+          "description": "1 fruit (2-5/8\" dia)",
+          "grams": 131.0
+        }
+      ]
+    },
+    {
+      "id": "174683",
+      "group": "Raisins",
+      "label": "Raisins rouges ou verts, crus",
+      "usdaDescription": "Grapes, red or green (European type, such as Thompson seedless), raw",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/174683/nutrients",
+      "per100g": {
+        "fat": 0.16,
+        "protein": 0.72,
+        "carbs": 18.1,
+        "calories": 69.0
+      },
+      "portions": [
+        {
+          "description": "1 cup",
+          "grams": 151.0
+        },
+        {
+          "description": "10 grapes",
+          "grams": 49.0
+        },
+        {
+          "description": "1 NLEA serving",
+          "grams": 126.0
+        }
+      ]
+    },
+    {
+      "id": "173740",
+      "group": "Haricots",
+      "label": "Haricots rouges bouillis, sans sel",
+      "usdaDescription": "Beans, kidney, all types, mature seeds, cooked, boiled, without salt",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/173740/nutrients",
+      "per100g": {
+        "calories": 127.0,
+        "fat": 0.5,
+        "carbs": 22.8,
+        "protein": 8.67
+      },
+      "portions": [
+        {
+          "description": "1 cup",
+          "grams": 177.0
+        },
+        {
+          "description": "1 tbsp",
+          "grams": 11.0
+        }
+      ]
+    },
+    {
+      "id": "171413",
+      "group": "Huile",
+      "label": "Huile d’olive",
+      "usdaDescription": "Oil, olive, salad or cooking",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/171413/nutrients",
+      "per100g": {
+        "fat": 100.0,
+        "carbs": 0.0,
+        "calories": 884.0,
+        "protein": 0.0
+      },
+      "portions": [
+        {
+          "description": "1 tablespoon",
+          "grams": 13.5
+        },
+        {
+          "description": "1 cup",
+          "grams": 216.0
+        },
+        {
+          "description": "1 tsp",
+          "grams": 4.5
+        }
+      ]
+    },
+    {
+      "id": "173410",
+      "group": "Beurre",
+      "label": "Beurre salé",
+      "usdaDescription": "Butter, salted",
+      "sourceUrl": "https://fdc.nal.usda.gov/food-details/173410/nutrients",
+      "per100g": {
+        "calories": 717.0,
+        "fat": 81.11,
+        "carbs": 0.06,
+        "protein": 0.85
+      },
+      "portions": [
+        {
+          "description": "1 pat (1\" sq, 1/3\" high)",
+          "grams": 5.0
+        },
+        {
+          "description": "1 tbsp",
+          "grams": 14.2
+        },
+        {
+          "description": "1 cup",
+          "grams": 227.0
+        },
+        {
+          "description": "1 stick",
+          "grams": 113.0
+        }
+      ]
+    }
+  ]
+}
