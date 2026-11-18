@@ -11,6 +11,8 @@ jest.mock('./storage', () => ({ SERVER_KEY: 'server', saveMeal: jest.fn().mockRe
 jest.mock('expo-image-picker', () => ({ requestCameraPermissionsAsync: jest.fn(), launchCameraAsync: jest.fn(), launchImageLibraryAsync: jest.fn() }));
 
 beforeEach(() => { jest.clearAllMocks(); });
+// The full entry/edit flow can exceed five seconds on a cold, parallel CI runner.
+// Keep the extra allowance local to this integration test.
 test('manual meal requires confirmation, saves real values, and edits reset confirmation', async () => {
   await render(<MealPhotoScreen />);
   await fireEvent.press(screen.getByText('Add a food manually'));
@@ -29,7 +31,7 @@ test('manual meal requires confirmation, saves real values, and edits reset conf
   expect(screen.getByText('Meal saved')).toBeOnTheScreen();
   await fireEvent.changeText(screen.getByLabelText('Grams of Rice'), '100');
   expect(screen.getByRole('checkbox', { checked: false })).toBeOnTheScreen();
-});
+}, 15000);
 test('camera denial explains permissions and does not launch camera', async () => {
   jest.mocked(ImagePicker.requestCameraPermissionsAsync).mockResolvedValue({ granted: false } as Awaited<ReturnType<typeof ImagePicker.requestCameraPermissionsAsync>>);
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
