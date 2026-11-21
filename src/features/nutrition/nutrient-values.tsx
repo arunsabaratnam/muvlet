@@ -3,13 +3,14 @@ import { colors, fonts, radius, spacing } from '@/constants/theme';
 import { nutrientKeys, type Nutrients } from './nutrition';
 
 const labels = { calories: 'Calories (kcal)', protein: 'Protein (g)', carbs: 'Carbs (g)', fat: 'Fat (g)' };
-export function NutrientValues({ values }: { values: Nutrients | null }) {
-  return <View style={s.grid}>{nutrientKeys.map(key => <View key={key} style={s.tile}>
+export function NutrientValues({ values, compact = false }: { values: Nutrients | null; compact?: boolean }) {
+  return <View style={s.grid}>{nutrientKeys.map(key => <View key={key} style={[s.tile, compact && s.compact]}>
     <Text style={s.value}>{values ? values[key].toFixed(key === 'calories' ? 0 : 1) : '—'}</Text>
-    <Text style={s.label}>{labels[key]}</Text>
+    <Text style={s.label}>{compact ? ({ calories: 'kcal', protein: 'Protein, g', carbs: 'Carbs, g', fat: 'Fat, g' })[key] : labels[key]}</Text>
   </View>)}</View>;
 }
 const s = StyleSheet.create({
+  compact: { width: undefined, flex: 1, padding: spacing.sm },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   tile: { width: '47%', flexGrow: 1, backgroundColor: colors.surfaceMuted, padding: spacing.md, borderRadius: radius.sm },
   value: { color: colors.primary, fontFamily: fonts.heading, fontSize: 24 },

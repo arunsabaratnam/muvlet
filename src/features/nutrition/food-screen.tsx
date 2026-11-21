@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
@@ -25,21 +25,20 @@ export default function FoodScreen() {
   return <SafeAreaView edges={['top', 'left', 'right']} style={s.root}>
     <ScrollView contentContainerStyle={s.content}>
       <Text style={s.title}>Food</Text>
-      <Text style={s.text}>Take a photo of your meal, check the foods and quantities, and save its estimated nutrition.</Text>
-      <Card style={s.card}>
-        <Text style={s.subtitle}>What’s on your plate?</Text>
-        <Text style={s.muted}>Use a clear photo with good lighting. You can correct every suggestion.</Text>
-        <Button title="Take a photo of a meal" onPress={() => router.push('/meal-photo')} />
-        <Button title="Add a meal manually" variant="secondary" onPress={() => router.push({ pathname: '/meal-photo', params: { manual: '1' } })} />
-      </Card>
-      <Text style={s.muted}>Recognition uses your computer. Quantities are entered by you or selected from reference portions; they are not measured from the photo.</Text>
-      <Text style={s.subtitle}>Meal history</Text>
+      <Text style={s.muted}>{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</Text>
+      {!loading && !error && meals.length === 0 && <View style={s.empty}>
+        <View style={s.plate}><Text style={[s.title, { fontSize: 40 }]}>＋</Text></View>
+        <Text style={s.subtitle}>No meals yet</Text><Text style={s.muted}>Add your first meal.</Text>
+      </View>}
+      <Button title="Scan meal" onPress={() => router.push('/meal-photo')} />
+      <Pressable accessibilityRole="button" style={s.link} onPress={() => router.push({ pathname: '/meal-photo', params: { manual: '1' } })}><Text style={[s.linkText, s.center]}>Add manually</Text></Pressable>
+      {!!meals.length && <Text style={s.subtitle}>Meal history</Text>}
       {loading ? <ActivityIndicator color={colors.primary} /> : error ? <Text accessibilityRole="alert" style={s.error}>{error}</Text> : meals.length === 0 ?
-        <Text style={s.muted}>Your saved meals will appear here.</Text> : meals.map(meal => <Card key={meal.id} style={s.card}>
+        null : meals.map(meal => <Card key={meal.id} style={s.card}>
           <Text style={s.text}>{new Date(meal.createdAt).toLocaleString()}</Text>
           <Text style={s.muted}>{meal.foods.map(food => `${food.name} · ${food.grams} g`).join('\n')}</Text>
           <NutrientValues values={meal.nutrition} />
-          <Text style={s.muted}>Estimated from confirmed foods and quantities.</Text>
+
         </Card>)}
     </ScrollView>
   </SafeAreaView>;

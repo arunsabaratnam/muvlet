@@ -14,7 +14,6 @@ export type FoodRow = {
   source: 'manual' | 'detector';
   boxes: Box[];
   score: number | null;
-  confirmed: boolean;
 };
 export type FoodProfile = {
   id: string; label: string; per100g: Nutrients; source: string;
@@ -61,7 +60,7 @@ export function summary(rows: FoodRow[]) {
 export function prepareMeal(rows: FoodRow[]) {
   if (!rows.length || rows.length > 20) throw new Error('Add between 1 and 20 foods.');
   return rows.map(row => {
-    if (!row.name.trim() || !row.confirmed) throw new Error('Check and confirm each food, preparation and quantity.');
+    if (!row.name.trim()) throw new Error('Enter a name for each food.');
     const result = forRow(row);
     if (!result) throw new Error('Choose a nutrition profile and enter a quantity greater than 0 and at most 5,000 g for each food.');
     return {

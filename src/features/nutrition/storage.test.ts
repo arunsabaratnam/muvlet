@@ -6,7 +6,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   __esModule: true, default: { getItem: jest.fn(), setItem: jest.fn() },
 }));
 const meal: Meal = { id: 'test', createdAt: '2026-11-17T12:00:00Z',
-  foods: prepareMeal([{ id: '1', name: 'Rice', grams: '100', foodId: '168878', source: 'manual', boxes: [], score: null, confirmed: true }]),
+  foods: prepareMeal([{ id: '1', name: 'Rice', grams: '100', foodId: '168878', source: 'manual', boxes: [], score: null }]),
   nutrition: { calories: 130, protein: 2.69, carbs: 28.17, fat: 0.28 } };
 beforeEach(() => jest.clearAllMocks());
 test('saves a meal once and reloads history', async () => {

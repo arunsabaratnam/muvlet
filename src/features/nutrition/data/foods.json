@@ -29,7 +29,8 @@
           "description": "0.5 breast, bone and skin removed",
           "grams": 86.0
         }
-      ]
+      ],
+      "displayLabel": "Chicken breast · roasted"
     },
     {
       "id": "171078",
@@ -52,7 +53,8 @@
           "description": "0.5 breast, bone and skin removed",
           "grams": 86.0
         }
-      ]
+      ],
+      "displayLabel": "Chicken breast · fried"
     },
     {
       "id": "171077",
@@ -79,7 +81,8 @@
           "description": "1 package",
           "grams": 926.0
         }
-      ]
+      ],
+      "displayLabel": "Chicken breast · raw"
     },
     {
       "id": "168878",
@@ -98,7 +101,8 @@
           "description": "1 cup",
           "grams": 158.0
         }
-      ]
+      ],
+      "displayLabel": "White rice · cooked"
     },
     {
       "id": "168877",
@@ -117,7 +121,8 @@
           "description": "1 cup",
           "grams": 185.0
         }
-      ]
+      ],
+      "displayLabel": "White rice · dry"
     },
     {
       "id": "169967",
@@ -152,7 +157,8 @@
           "description": "1 spear (about 5\" long)",
           "grams": 37.0
         }
-      ]
+      ],
+      "displayLabel": "Broccoli · boiled"
     },
     {
       "id": "170379",
@@ -191,7 +197,8 @@
           "description": "1 NLEA serving",
           "grams": 148.0
         }
-      ]
+      ],
+      "displayLabel": "Broccoli · raw"
     },
     {
       "id": "169737",
@@ -242,7 +249,8 @@
           "description": "1 cup lasagne",
           "grams": 116.0
         }
-      ]
+      ],
+      "displayLabel": "Pasta · cooked"
     },
     {
       "id": "169736",
@@ -289,7 +297,8 @@
           "description": "1 cup lasagna",
           "grams": 90.0
         }
-      ]
+      ],
+      "displayLabel": "Pasta · dry"
     },
     {
       "id": "175168",
@@ -312,7 +321,8 @@
           "description": "0.5 fillet",
           "grams": 178.0
         }
-      ]
+      ],
+      "displayLabel": "Atlantic salmon · cooked"
     },
     {
       "id": "175167",
@@ -335,7 +345,8 @@
           "description": "0.5 fillet",
           "grams": 198.0
         }
-      ]
+      ],
+      "displayLabel": "Atlantic salmon · raw"
     },
     {
       "id": "171794",
@@ -358,7 +369,8 @@
           "description": "1 portion ( yield from 1/2 lb raw meat )",
           "grams": 154.0
         }
-      ]
+      ],
+      "displayLabel": "Ground beef, 90% lean · cooked"
     },
     {
       "id": "174030",
@@ -377,7 +389,8 @@
           "description": "4 oz",
           "grams": 113.0
         }
-      ]
+      ],
+      "displayLabel": "Ground beef, 90% lean · raw"
     },
     {
       "id": "171956",
@@ -400,7 +413,8 @@
           "description": "1 fillet",
           "grams": 180.0
         }
-      ]
+      ],
+      "displayLabel": "Atlantic cod · cooked"
     },
     {
       "id": "171955",
@@ -423,7 +437,8 @@
           "description": "1 fillet",
           "grams": 231.0
         }
-      ]
+      ],
+      "displayLabel": "Atlantic cod · raw"
     },
     {
       "id": "173424",
@@ -450,7 +465,8 @@
           "description": "1 large",
           "grams": 50.0
         }
-      ]
+      ],
+      "displayLabel": "Egg · hard-boiled"
     },
     {
       "id": "173423",
@@ -469,7 +485,8 @@
           "description": "1 large",
           "grams": 46.0
         }
-      ]
+      ],
+      "displayLabel": "Egg · fried"
     },
     {
       "id": "170440",
@@ -500,7 +517,8 @@
           "description": "1 small (1-3/4\" to 2-1/2\" dia.)",
           "grams": 125.0
         }
-      ]
+      ],
+      "displayLabel": "Potato · boiled, peeled"
     },
     {
       "id": "170698",
@@ -527,7 +545,8 @@
           "description": "1 serving large",
           "grams": 154.0
         }
-      ]
+      ],
+      "displayLabel": "French fries"
     },
     {
       "id": "170393",
@@ -578,7 +597,8 @@
           "description": "1 strip medium",
           "grams": 4.0
         }
-      ]
+      ],
+      "displayLabel": "Carrot · raw"
     },
     {
       "id": "170394",
@@ -605,7 +625,8 @@
           "description": "1 carrot",
           "grams": 46.0
         }
-      ]
+      ],
+      "displayLabel": "Carrot · boiled"
     },
     {
       "id": "170457",
@@ -672,7 +693,8 @@
           "description": "1 NLEA serving",
           "grams": 148.0
         }
-      ]
+      ],
+      "displayLabel": "Tomato · raw"
     },
     {
       "id": "169247",
@@ -707,7 +729,8 @@
           "description": "1 NLEA serving",
           "grams": 85.0
         }
-      ]
+      ],
+      "displayLabel": "Romaine lettuce"
     },
     {
       "id": "168409",
@@ -730,7 +753,8 @@
           "description": "1 cucumber (8-1/4\")",
           "grams": 301.0
         }
-      ]
+      ],
+      "displayLabel": "Cucumber · with peel"
     },
     {
       "id": "171705",
@@ -765,7 +789,8 @@
           "description": "1 NLEA Serving",
           "grams": 50.0
         }
-      ]
+      ],
+      "displayLabel": "Avocado"
     },
     {
       "id": "172688",
@@ -788,7 +813,8 @@
           "description": "1 oz",
           "grams": 28.35
         }
-      ]
+      ],
+      "displayLabel": "Whole-wheat bread"
     },
     {
       "id": "173414",
@@ -827,7 +853,8 @@
           "description": "1 slice (1 oz)",
           "grams": 28.0
         }
-      ]
+      ],
+      "displayLabel": "Cheddar cheese"
     },
     {
       "id": "169251",
@@ -870,7 +897,8 @@
           "description": "0.5 cup pieces",
           "grams": 35.0
         }
-      ]
+      ],
+      "displayLabel": "White mushrooms · raw"
     },
     {
       "id": "169252",
@@ -897,7 +925,8 @@
           "description": "1 mushroom",
           "grams": 12.0
         }
-      ]
+      ],
+      "displayLabel": "White mushrooms · boiled"
     },
     {
       "id": "169141",
@@ -916,7 +945,8 @@
           "description": "1 cup",
           "grams": 125.0
         }
-      ]
+      ],
+      "displayLabel": "Green beans · boiled"
     },
     {
       "id": "168525",
@@ -955,7 +985,8 @@
           "description": "1 ear, yields",
           "grams": 77.0
         }
-      ]
+      ],
+      "displayLabel": "Sweet corn · boiled"
     },
     {
       "id": "175180",
@@ -974,7 +1005,8 @@
           "description": "3 oz",
           "grams": 85.0
         }
-      ]
+      ],
+      "displayLabel": "Shrimp · cooked"
     },
     {
       "id": "171970",
@@ -997,7 +1029,8 @@
           "description": "4 large",
           "grams": 30.0
         }
-      ]
+      ],
+      "displayLabel": "Shrimp · breaded & fried"
     },
     {
       "id": "170317",
@@ -1044,7 +1077,8 @@
           "description": "1 package 8 oz pizza",
           "grams": 199.0
         }
-      ]
+      ],
+      "displayLabel": "Cheese pizza · frozen, cooked"
     },
     {
       "id": "172971",
@@ -1071,7 +1105,8 @@
           "description": "1 serving",
           "grams": 48.0
         }
-      ]
+      ],
+      "displayLabel": "Pork sausage · cooked"
     },
     {
       "id": "172448",
@@ -1098,7 +1133,8 @@
           "description": "0.2 block",
           "grams": 91.0
         }
-      ]
+      ],
+      "displayLabel": "Firm tofu"
     },
     {
       "id": "172451",
@@ -1121,7 +1157,8 @@
           "description": "1 piece",
           "grams": 13.0
         }
-      ]
+      ],
+      "displayLabel": "Tofu · fried"
     },
     {
       "id": "171688",
@@ -1164,7 +1201,8 @@
           "description": "1 NLEA serving",
           "grams": 242.0
         }
-      ]
+      ],
+      "displayLabel": "Apple · with skin"
     },
     {
       "id": "173944",
@@ -1211,7 +1249,8 @@
           "description": "1 NLEA serving",
           "grams": 126.0
         }
-      ]
+      ],
+      "displayLabel": "Banana"
     },
     {
       "id": "167762",
@@ -1266,7 +1305,8 @@
           "description": "1 NLEA serving",
           "grams": 147.0
         }
-      ]
+      ],
+      "displayLabel": "Strawberries"
     },
     {
       "id": "169097",
@@ -1297,7 +1337,8 @@
           "description": "1 fruit (2-5/8\" dia)",
           "grams": 131.0
         }
-      ]
+      ],
+      "displayLabel": "Orange"
     },
     {
       "id": "174683",
@@ -1324,7 +1365,8 @@
           "description": "1 NLEA serving",
           "grams": 126.0
         }
-      ]
+      ],
+      "displayLabel": "Grapes"
     },
     {
       "id": "173740",
@@ -1347,7 +1389,8 @@
           "description": "1 tbsp",
           "grams": 11.0
         }
-      ]
+      ],
+      "displayLabel": "Kidney beans · boiled"
     },
     {
       "id": "171413",
@@ -1374,7 +1417,8 @@
           "description": "1 tsp",
           "grams": 4.5
         }
-      ]
+      ],
+      "displayLabel": "Olive oil"
     },
     {
       "id": "173410",
@@ -1405,7 +1449,8 @@
           "description": "1 stick",
           "grams": 113.0
         }
-      ]
+      ],
+      "displayLabel": "Salted butter"
     }
   ]
 }

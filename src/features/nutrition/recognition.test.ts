@@ -7,7 +7,7 @@ test('groups repeated food regions without treating region count as quantity', (
   expect(rows).toHaveLength(1);
   expect(rows[0].boxes).toHaveLength(2);
   expect(rows[0].grams).toBe('');
-  expect(rows[0].confirmed).toBe(false);
+  expect(rows[0].grams).toBe('');
 });
 test('rejects malformed server data and old protocols', () => {
   expect(validResult(result)).toBe(true);

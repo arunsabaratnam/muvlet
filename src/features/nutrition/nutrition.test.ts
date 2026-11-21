@@ -1,6 +1,6 @@
 import { foods, forRow, prepareMeal, summary, type FoodRow } from './nutrition';
 
-const row = (foodId = '171477', grams = '150'): FoodRow => ({ id: '1', name: 'Chicken', grams, foodId, boxes: [], score: null, source: 'manual', confirmed: true });
+const row = (foodId = '171477', grams = '150'): FoodRow => ({ id: '1', name: 'Chicken', grams, foodId, boxes: [], score: null, source: 'manual' });
 test('sums USDA nutrients by weight without rounding intermediate results', () => {
   const result = summary([row(), row('168878', '200'), row('169967', '100')]);
   expect(result.complete).toBe(true);
@@ -17,7 +17,7 @@ test('missing information is not treated as zero and cannot be saved', () => {
   expect(summary([row('missing')]).total).toBeNull();
   expect(summary([row(), row('missing')]).complete).toBe(false);
   expect(() => prepareMeal([row('missing')])).toThrow();
-  expect(() => prepareMeal([{ ...row(), confirmed: false }])).toThrow();
+  expect(() => prepareMeal([{ ...row(), name: '' }])).toThrow();
 });
 test.each(['', '0', '-1', '5001', 'Infinity', '1e3', 'abc'])('rejects invalid quantity %s', grams => {
   expect(forRow(row('171477', grams))).toBeNull();

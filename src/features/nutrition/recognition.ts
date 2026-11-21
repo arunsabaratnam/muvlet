@@ -18,7 +18,7 @@ export function groupDetections(detections: Detection[]): FoodRow[] {
     let row = groups.get(detection.label);
     if (!row) {
       row = { id: `detected-${groups.size}`, name: detection.label, score: detection.score,
-        boxes: [], grams: '', source: 'detector', confirmed: false };
+        boxes: [], grams: '', source: 'detector' };
       groups.set(detection.label, row);
     }
     row.boxes.push(detection.box);

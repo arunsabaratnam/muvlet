@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { colors } from '@/constants/theme';
-import { FoodNutrition } from './food-nutrition';
-import { prepareMeal, summary, type FoodRow } from './nutrition';
+import { FoodEditor } from './food-editor';
+import { forRow, prepareMeal, summary, type FoodRow } from './nutrition';
 import { NutrientValues } from './nutrient-values';
 import { groupDetections, localEndpoint, recognizeFood } from './recognition';
 import { saveMeal, SERVER_KEY } from './storage';
@@ -17,6 +16,10 @@ import { styles as s } from './styles';
 type Photo = { uri: string; base64: string; ratio: number };
 export default function MealPhotoScreen() {
   const { manual } = useLocalSearchParams<{ manual?: string }>();
+  const blank = (): FoodRow => ({ id: `manual-${Date.now()}-${++sequence.current}`, name: '', grams: '', boxes: [], score: null, source: 'manual' });
+  const [settings, setSettings] = useState(false);
+  const [editor, setEditor] = useState<FoodRow | null>(() => manual === '1' ? { id: 'manual-first', name: '', grams: '', boxes: [], score: null, source: 'manual' } : null);
+  const [review, setReview] = useState(manual === '1');
   const [photo, setPhoto] = useState<Photo | null>(null);
   const [rows, setRows] = useState<FoodRow[]>([]);
   const [url, setUrl] = useState('');
@@ -35,13 +38,8 @@ export default function MealPhotoScreen() {
     AsyncStorage.getItem(SERVER_KEY).then(value => { if (mounted.current && value) setUrl(value); }).catch(() => {});
     return () => { mounted.current = false; controller.current?.abort(); };
   }, []);
-  function edit(id: string, patch: Partial<FoodRow>) {
-    setRows(previous => previous.map(row => row.id === id ? { ...row, ...patch, confirmed: patch.confirmed ?? false } : row));
-    setSaved(false); setError('');
-  }
   function addFood() {
-    setRows(previous => [...previous, { id: `manual-${++sequence.current}`, name: '', grams: '', boxes: [], score: null, source: 'manual', confirmed: false }]);
-    setSaved(false); setError('');
+    setEditor(blank()); setError('');
   }
   function replaceDraft(action: () => void) {
     if (!rows.length || saved) { action(); return; }
@@ -62,6 +60,7 @@ export default function MealPhotoScreen() {
           return;
         }
       }
+      if (!mounted.current) return;
       const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 0.6, allowsEditing: false, base64: true };
       const result = library ? await ImagePicker.launchImageLibraryAsync(options) : await ImagePicker.launchCameraAsync(options);
       if (!result.canceled && mounted.current) {
@@ -69,7 +68,7 @@ export default function MealPhotoScreen() {
         if (!asset?.base64 || !asset.width || !asset.height) throw new Error('Unable to read this photo. Choose another image.');
         if (asset.base64.length > 11 * 1024 * 1024) throw new Error('Photo too large. Choose a smaller image.');
         setPhoto({ uri: asset.uri, base64: asset.base64, ratio: asset.width / asset.height });
-        setRows([]); setAnalyzed(false); setSaved(false);
+        setRows([]); setAnalyzed(false); setSaved(false); setReview(false);
       }
     } catch (e) { if (mounted.current) setError(e instanceof Error ? e.message : 'Unable to open the camera or library.'); }
     finally { lock.current = false; if (mounted.current) setBusy(null); }
@@ -77,8 +76,8 @@ export default function MealPhotoScreen() {
   async function analyze() {
     if (lock.current || !photo) return;
     const endpoint = localEndpoint(url);
-    if (!endpoint) { setError('Enter the current local address shown by the server, such as http://192.168.1.10:8765.'); return; }
-    if (!token.trim()) { setError('Enter the pairing code shown by the Python server.'); return; }
+    if (!endpoint) { setSettings(true); setError('Enter the current local address shown by the server, such as http://192.168.1.10:8765.'); return; }
+    if (!token.trim()) { setSettings(true); setError('Enter the pairing code shown by the Python server.'); return; }
     lock.current = true; setBusy('analysis'); setError('');
     const abort = new AbortController(); controller.current = abort;
     const timer = setTimeout(() => abort.abort(), 180000);
@@ -87,7 +86,7 @@ export default function MealPhotoScreen() {
       if (!mounted.current) return;
       setRows(groupDetections(result.detections));
       setPhoto({ ...photo, ratio: result.imageWidth / result.imageHeight });
-      setAnalyzed(true); setSaved(false);
+      setAnalyzed(true); setSaved(false); setReview(true);
       void AsyncStorage.setItem(SERVER_KEY, endpoint).catch(() => {});
     } catch (e) {
       if (mounted.current) setError(e instanceof Error && e.name === 'AbortError'
@@ -109,62 +108,88 @@ export default function MealPhotoScreen() {
     finally { lock.current = false; if (mounted.current) setBusy(null); }
   }
   function back() {
-    if (router.canGoBack()) router.back(); else router.replace('/(tabs)/food');
+    const leave = () => { if (router.canGoBack()) router.back(); else router.replace('/(tabs)/food'); };
+    if (rows.length && !saved) {
+      Alert.alert('Leave this meal?', 'Your unsaved changes will be lost.', [
+        { text: 'Keep editing', style: 'cancel' }, { text: 'Leave', style: 'destructive', onPress: leave },
+      ]);
+    } else leave();
   }
+  // Open native UI after the route mounts. Cancel the scheduled launch on unmount.
+  useEffect(() => {
+    if (manual === '1') return;
+    const launch = setTimeout(() => { void capture(); }, 0);
+    return () => clearTimeout(launch);
+    // Capture uses the initial empty draft; later state changes must not reopen it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const editingExisting = !!editor && rows.some(row => row.id === editor.id);
   return <SafeAreaView style={s.root}>
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.content}>
-        <Button title={saved ? 'View saved meals' : 'Back to Food'} variant="secondary" disabled={busy === 'save'} onPress={back} />
-        <Text style={s.title}>{manual === '1' ? 'Add a meal' : 'Take a photo of your meal'}</Text>
-        <Text style={s.muted}>Confirm the foods, choose a nutrition profile and adjust the quantities before saving.</Text>
-        <Button title={photo ? 'Retake photo' : 'Take photo'} disabled={!!busy} onPress={() => replaceDraft(() => { void capture(); })} />
-        <Button title="Choose from library" variant="secondary" disabled={!!busy} onPress={() => replaceDraft(() => { void capture(true); })} />
-        {photo && <>
-          <View style={[s.photo, { aspectRatio: photo.ratio }]}>
-            <Image accessibilityLabel="Your meal photo" source={{ uri: photo.uri }} resizeMode="contain" style={{ width: '100%', height: '100%' }} />
-            {analyzed && rows.flatMap((row, i) => row.boxes.map((box, j) => <View key={`${row.id}-${j}`} pointerEvents="none" style={{
-              position: 'absolute', left: `${box[0] * 100}%`, top: `${box[1] * 100}%`,
-              width: `${(box[2] - box[0]) * 100}%`, height: `${(box[3] - box[1]) * 100}%`,
-              borderWidth: 2, borderColor: colors.primary,
-            }}><Text style={{ backgroundColor: colors.primary, color: colors.onPrimary, alignSelf: 'flex-start' }}>{i + 1}</Text></View>))}
+    <View style={s.toolbar}>
+      <Pressable accessibilityRole="button" style={s.link} disabled={!!busy} onPress={back}><Text style={s.linkText}>Back</Text></Pressable>
+      <Text style={s.subtitle}>{saved ? 'Meal saved' : review ? 'Review meal' : 'Scan meal'}</Text>
+      {!review ? <Pressable accessibilityRole="button" accessibilityLabel="Recognition settings" style={s.link} disabled={!!busy} onPress={() => setSettings(true)}><Text style={s.linkText}>Setup</Text></Pressable> : <View style={{ width: 48 }} />}
+    </View>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[s.content, { flexGrow: 1 }]}>
+      {!review && <>
+        {photo ? <View style={[s.photo, { aspectRatio: Math.max(photo.ratio, .8) }]}>
+          <Image accessibilityLabel="Your meal photo" source={{ uri: photo.uri }} resizeMode="contain" style={{ width: '100%', height: '100%' }} />
+        </View> : <View style={[s.empty, { flex: 1 }]}><View style={s.plate}><Text style={[s.title, { fontSize: 44 }]}>＋</Text></View><Text style={s.subtitle}>What’s on your plate?</Text><Text style={s.muted}>Fit your meal in the frame.</Text></View>}
+        {!busy && <>
+          <Button title={photo ? 'Analyze foods' : 'Take photo'} onPress={() => { if (photo) replaceDraft(() => { void analyze(); }); else void capture(); }} />
+          <View style={[s.amountRow, { justifyContent: 'center' }]}>
+            {photo && <Pressable accessibilityRole="button" style={s.link} onPress={() => replaceDraft(() => { void capture(); })}><Text style={s.linkText}>Retake</Text></Pressable>}
+            <Pressable accessibilityRole="button" style={s.link} onPress={() => replaceDraft(() => { void capture(true); })}><Text style={s.linkText}>Choose from library</Text></Pressable>
           </View>
-          <Card style={s.card}>
-            <Text style={s.subtitle}>Connect to your computer</Text>
-            <Text style={s.muted}>Start the meal-recognition server and enter its address and code. Use a trusted local network shared by both devices.</Text>
-            <TextInput style={s.input} accessibilityLabel="Recognition server address" placeholder="http://192.168.1.10:8765" placeholderTextColor={colors.textMuted}
-              autoCapitalize="none" autoCorrect={false} editable={!busy} value={url} onChangeText={setUrl} />
-            <TextInput style={s.input} accessibilityLabel="Server pairing code" placeholder="Pairing code" placeholderTextColor={colors.textMuted}
-              autoCapitalize="none" autoCorrect={false} secureTextEntry editable={!busy} value={token} onChangeText={setToken} />
-            <Text style={s.muted}>Analyze sends this photo to your computer over local HTTP. The server does not save it. Recognition can miss foods and does not measure quantities.</Text>
-            <Button title={analyzed ? 'Analyze again' : 'Analyze foods'} disabled={!!busy} onPress={() => replaceDraft(() => { void analyze(); })} />
-          </Card>
+          {!!rows.length && <Pressable accessibilityRole="button" style={s.link} onPress={() => setReview(true)}><Text style={[s.linkText, s.center]}>Back to meal</Text></Pressable>}
+          <Pressable accessibilityRole="button" style={s.link} onPress={() => { setReview(true); addFood(); }}><Text style={[s.linkText, s.center]}>Add manually</Text></Pressable>
         </>}
-        {busy && <ActivityIndicator color={colors.primary} />}
-        {busy === 'analysis' && <><Text style={s.muted}>Analyzing on your computer. This may take a few minutes.</Text><Button title="Cancel analysis" variant="secondary" onPress={() => controller.current?.abort()} /></>}
-        {!!error && <Text accessibilityRole="alert" style={s.error}>{error}</Text>}
-        {analyzed && rows.length === 0 && <Text style={s.muted}>No confident food suggestions. Try another photo or add foods manually.</Text>}
-        {rows.map((row, i) => <Card key={row.id} style={s.card}>
-          <Text style={s.subtitle}>Food {i + 1}</Text>
-          {row.score !== null && <Text style={s.muted}>Model score: {Math.round(row.score * 100)}%. Please verify.</Text>}
-          <TextInput style={s.input} accessibilityLabel={`Food ${i + 1} name`} value={row.name} editable={!busy} placeholder="Food name" placeholderTextColor={colors.textMuted}
-            onChangeText={name => edit(row.id, { name, foodId: undefined, custom: {}, grams: '', quantitySource: 'user', portionDescription: null })} />
-          <FoodNutrition row={row} disabled={!!busy} onChange={patch => edit(row.id, patch)} />
-          <Pressable style={s.link} accessibilityRole="checkbox" accessibilityState={{ checked: row.confirmed, disabled: !!busy }} disabled={!!busy}
-            onPress={() => edit(row.id, { confirmed: !row.confirmed })}>
-            <Text style={s.linkText}>{row.confirmed ? '☑' : '☐'} I confirm this food, profile and quantity</Text>
-          </Pressable>
-          <Button title="Remove food" variant="secondary" disabled={!!busy} onPress={() => { setRows(previous => previous.filter(r => r.id !== row.id)); setSaved(false); }} />
-        </Card>)}
-        <Button title="Add a food manually" variant="secondary" disabled={!!busy || rows.length >= 20} onPress={addFood} />
-        {rows.length > 0 && <Card style={s.card}>
-          <Text style={s.subtitle}>{totals.complete ? 'Estimated meal total' : 'Incomplete subtotal'}</Text>
-          <Text style={s.muted}>{totals.calculated} of {rows.length} foods calculated</Text>
-          <NutrientValues values={totals.total} />
-          <Text style={s.muted}>Values depend on your chosen profiles and quantities. Include oils and sauces if they are not already part of the selected preparation.</Text>
-          <Button title={saved ? 'Meal saved' : 'Save meal'} disabled={!!busy || saved} onPress={() => { void save(); }} />
-        </Card>}
-        {saved && <Text accessibilityRole="alert" style={s.text}>Meal saved on this device. The photo is not kept in history.</Text>}
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </>}
+      {busy && <ActivityIndicator color={colors.primary} />}
+      {busy === 'analysis' && <><Text style={[s.muted, s.center]}>Looking for foods… This may take a few minutes.</Text><Pressable accessibilityRole="button" style={s.link} onPress={() => controller.current?.abort()}><Text style={[s.linkText, s.center]}>Cancel analysis</Text></Pressable></>}
+      {!!error && !settings && <Text accessibilityRole="alert" style={s.error}>{error}</Text>}
+      {review && <>
+        {photo && <View style={[s.photo, { aspectRatio: photo.ratio }]}>
+          <Image accessibilityLabel="Your meal photo" source={{ uri: photo.uri }} resizeMode="contain" style={{ width: '100%', height: '100%' }} />
+          {analyzed && rows.flatMap((row, i) => row.boxes.map((box, j) => <View key={`${row.id}-${j}`} pointerEvents="none" style={{
+            position: 'absolute', left: `${box[0] * 100}%`, top: `${box[1] * 100}%`,
+            width: `${(box[2] - box[0]) * 100}%`, height: `${(box[3] - box[1]) * 100}%`, borderWidth: 2, borderColor: colors.primary,
+          }}><Text style={{ backgroundColor: colors.primary, color: colors.onPrimary, alignSelf: 'flex-start' }}>{i + 1}</Text></View>))}
+        </View>}
+        {!rows.length && <View style={s.empty}><Text style={s.subtitle}>{analyzed ? 'No foods found' : 'Build your meal'}</Text><Text style={s.muted}>{analyzed ? 'Try another photo or add a food below.' : 'Search for your first food to get started.'}</Text></View>}
+        {rows.map((row, i) => {
+          const result = forRow(row);
+          return <Pressable key={row.id} accessibilityRole="button" accessibilityLabel={`Edit ${row.name}`} style={s.foodItem} disabled={!!busy || saved} onPress={() => setEditor(row)}>
+            <Text style={s.linkText}>{i + 1}</Text>
+            <View style={{ flex: 1, gap: 4 }}><Text style={s.text}>{row.name}</Text><Text style={result ? s.muted : s.error}>{result ? `${result.grams} g · ${Math.round(result.values.calories)} kcal` : 'Choose food & quantity'}</Text></View>
+            {!saved && <Text style={s.linkText}>Edit</Text>}
+          </Pressable>;
+        })}
+        {!saved && <Pressable accessibilityRole="button" accessibilityState={{ disabled: rows.length >= 20 || !!busy }} disabled={rows.length >= 20 || !!busy} style={s.link} onPress={addFood}><Text style={s.linkText}>＋ Add food</Text></Pressable>}
+        {photo && !saved && <Pressable accessibilityRole="button" style={s.link} disabled={!!busy} onPress={() => setReview(false)}><Text style={s.linkText}>Change photo</Text></Pressable>}
+      </>}
+    </ScrollView>
+    {review && rows.length > 0 && <View style={s.footer}>
+      <Text style={s.muted}>{totals.complete ? 'Estimated nutrition' : `${rows.length - totals.calculated} food(s) need a quantity or profile`}</Text>
+      <NutrientValues values={totals.total} compact />
+      <Button title={saved ? 'View saved meals' : 'Save meal'} disabled={!!busy || (!saved && !totals.complete)} onPress={saved ? back : () => { void save(); }} />
+    </View>}
+    {editor && <FoodEditor key={editor.id} initial={editor} onClose={() => setEditor(null)}
+      onSave={row => { setRows(previous => editingExisting ? previous.map(item => item.id === row.id ? row : item) : [...previous, row]); setEditor(null); setSaved(false); setError(''); }}
+      onRemove={editingExisting ? () => { setRows(previous => previous.filter(row => row.id !== editor.id)); setEditor(null); setSaved(false); } : undefined} />}
+    <Modal visible={settings} animationType="slide" onRequestClose={() => setSettings(false)}>
+      <SafeAreaView style={s.root}><KeyboardAvoidingView style={s.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={s.toolbar}><Text style={s.subtitle}>Recognition setup</Text><Pressable accessibilityRole="button" style={s.link} onPress={() => setSettings(false)}><Text style={s.linkText}>Done</Text></Pressable></View>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.content}>
+          <Text style={s.text}>Start the server on your computer. Connect both devices to the same trusted network.</Text>
+          <Text style={s.muted}>Server address</Text>
+          <TextInput style={s.input} accessibilityLabel="Recognition server address" placeholder="http://192.168.1.10:8765" placeholderTextColor={colors.textMuted} autoCapitalize="none" autoCorrect={false} value={url} onChangeText={setUrl} />
+          <Text style={s.muted}>Pairing code</Text>
+          <TextInput style={s.input} accessibilityLabel="Server pairing code" placeholder="Code from the server window" placeholderTextColor={colors.textMuted} autoCapitalize="none" autoCorrect={false} secureTextEntry value={token} onChangeText={setToken} />
+          <Text style={s.muted}>Analyze sends your photo to this computer over local HTTP. Photos aren’t saved. Suggestions can be wrong; quantities are entered by you.</Text>
+          {!!error && <Text accessibilityRole="alert" style={s.error}>{error}</Text>}
+        </ScrollView>
+      </KeyboardAvoidingView></SafeAreaView>
+    </Modal>
   </SafeAreaView>;
 }
