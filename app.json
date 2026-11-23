@@ -28,6 +28,14 @@
         {
           "backgroundColor": "#E4ECFF"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow Muvlet to take a photo of your meal.",
+          "photosPermission": "Allow Muvlet to select a meal photo.",
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {
