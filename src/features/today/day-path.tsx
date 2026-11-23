@@ -59,11 +59,16 @@ type DayPathProps = {
   onFinish: (step: Step) => void;
   onSkip: (step: Step) => void;
   onUndo: (step: Step) => void;
+  /** A first workout can move to the next workout day, named here. */
+  laterDay?: string;
+  onLater?: (step: Step) => void;
   onToggleSection: (title: string) => void;
+  /** What tomorrow holds, as a last line under the day. */
+  tomorrow?: string;
 };
 
 /** Today's steps in Morning, Afternoon, Evening and Before bed. */
-export function DayPath({ sections, expanded, onToggleSection, ...rest }: DayPathProps) {
+export function DayPath({ sections, expanded, onToggleSection, tomorrow, ...rest }: DayPathProps) {
   return (
     <View style={styles.path}>
       {sections.map((section) => {
@@ -125,6 +130,12 @@ export function DayPath({ sections, expanded, onToggleSection, ...rest }: DayPat
           </Animated.View>
         );
       })}
+      {tomorrow ? (
+        <Animated.View layout={MOVE} style={styles.header}>
+          <Text style={[styles.title, styles.pastTitle]}>Tomorrow</Text>
+          <Text style={styles.tomorrow}>{tomorrow}</Text>
+        </Animated.View>
+      ) : null}
     </View>
   );
 }
@@ -143,7 +154,11 @@ function StepRow({
   onFinish,
   onSkip,
   onUndo,
-}: Omit<DayPathProps, 'sections' | 'expanded' | 'onToggleSection'> & { step: Step }) {
+  laterDay,
+  onLater,
+}: Omit<DayPathProps, 'sections' | 'expanded' | 'onToggleSection' | 'tomorrow'> & {
+  step: Step;
+}) {
   const done = step.doneAt !== undefined;
   const ended = doneText(step);
   const open = step.id === (openId ?? next?.id) || step.id === justDone;
@@ -189,6 +204,8 @@ function StepRow({
           cardRef={workoutRef}
           onStart={() => onFinish(step)}
           onPreview={() => onPreview(step)}
+          laterDay={laterDay}
+          onLater={step.first && onLater ? () => onLater(step) : undefined}
         />
       ) : open ? (
         <View style={[styles.card, styles.openCard, done && styles.doneCard]}>
@@ -196,7 +213,9 @@ function StepRow({
             <Text style={styles.cardTitle}>{done ? ended.title : step.title}</Text>
             <Text style={styles.detail}>{done ? ended.detail : detail}</Text>
             {done ? (
-              step.id !== justDone && (
+              // The plan onboarding built can't be undone.
+              step.id !== justDone &&
+              step.id !== 'plan' && (
                 <Text
                   accessibilityRole="button"
                   onPress={() => onUndo(step)}
@@ -461,6 +480,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: colors.onPrimary,
+  },
+  tomorrow: {
+    flex: 1,
+    textAlign: 'right',
+    fontFamily: fonts.bodyBold,
+    fontSize: 12.5,
+    color: colors.textMuted,
   },
   undo: {
     alignSelf: 'flex-start',

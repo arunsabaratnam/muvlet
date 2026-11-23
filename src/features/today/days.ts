@@ -1,13 +1,23 @@
 import type { CoachName } from '@/features/welcome/coach';
 
-import { MOCK_POINTS, MOCK_STEPS, WALK, type Step, type StepId, type Week } from './day';
+import {
+  MOCK_NAME,
+  MOCK_POINTS,
+  MOCK_STEPS,
+  PLAN,
+  WALK,
+  type Step,
+  type StepId,
+  type Week,
+} from './day';
 
 /*
- * Days to try Today on, from the mockup's "Try a day" list. The app opens on the normal day;
- * the others are for checking how Today handles a day that didn't go to plan.
+ * Days to try Today on, from the mockup's "Try a day" list. The app opens on the normal day, or
+ * the first day right after onboarding; the others are for checking how Today handles a day
+ * that didn't go to plan.
  */
 
-export type DayKey = 'normal' | 'lapse' | 'night' | 'missed' | 'rest' | 'back' | 'paused';
+export type DayKey = 'normal' | 'first' | 'lapse' | 'night' | 'missed' | 'rest' | 'back' | 'paused';
 
 /** A coach's card above the path. */
 export type CardKey = 'missed' | 'back' | 'paused' | 'rest';
@@ -35,6 +45,8 @@ export type Day = {
   card?: CardKey;
   /** What a coach says in the sky when Today opens, instead of the next step's tip. */
   say?: { coach: CoachName; text: string };
+  /** A new member's first day, straight after onboarding. */
+  first?: boolean;
 };
 
 const STREAK = 4;
@@ -54,6 +66,31 @@ export const DAYS: Record<DayKey, Day> = {
     points: MOCK_POINTS,
     protein: 64,
     week: { streak: STREAK },
+  },
+  first: {
+    key: 'first',
+    name: 'First day after onboarding',
+    when: 'Monday, 5:45 PM',
+    at: new Date(2026, 8, 28, 17, 45),
+    steps: [
+      PLAN,
+      step('workout', {
+        first: true,
+        detail: '5 exercises · 25 min',
+        result: '25 min',
+        doneDetail: '5 exercises · 25 min',
+      }),
+      step('dinner'),
+      step('stretch'),
+    ],
+    points: PLAN.points,
+    protein: 0,
+    week: { plan: [0, 2, 4], streak: 0, first: true },
+    say: {
+      coach: 'rex',
+      text: `Welcome to the crew, ${MOCK_NAME}! First up: a light workout tonight.`,
+    },
+    first: true,
   },
   lapse: {
     key: 'lapse',

@@ -64,7 +64,7 @@ async function start(step = 'intro') {
     { initialUrl: `/onboarding/${step}` },
   );
   await app;
-  return { pathname: () => app.getPathname() };
+  return { pathname: () => app.getPathname(), params: () => app.getSearchParams() };
 }
 
 // Every step keeps its Continue mounted underneath the next one, so press the last.
@@ -366,6 +366,8 @@ test('the whole flow ends on Today, with no way back into it', async () => {
   expect(app.pathname()).toBe('/onboarding/reminders');
   await fireEvent.press(screen.getByText('Not now'));
   expect(app.pathname()).toBe('/today');
+  // Today opens on a new member's first day.
+  expect(app.params()).toEqual({ first: '1' });
   expect(router.canGoBack()).toBe(false);
 });
 

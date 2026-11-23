@@ -5,7 +5,7 @@ import type { CoachName } from '@/features/welcome/coach';
  * so the day is mock data, the same as the mockup's normal day. Other days are in days.ts.
  */
 
-export type StepId = 'breakfast' | 'workout' | 'walk' | 'dinner' | 'stretch';
+export type StepId = 'plan' | 'breakfast' | 'workout' | 'walk' | 'dinner' | 'stretch';
 
 export type Step = {
   id: StepId;
@@ -36,6 +36,8 @@ export type Step = {
   skipped?: boolean;
   /** A lighter workout, to ease back in after time away. */
   lite?: boolean;
+  /** A new member's first workout: shorter, with no weights until they find theirs. */
+  first?: boolean;
 };
 
 export const MOCK_NAME = 'Arun';
@@ -121,9 +123,35 @@ export const WALK: Step = {
   doneDetail: '20 min · any pace',
 };
 
+/** On a first day: the plan onboarding just built, already done, so the day doesn't start at 0. */
+export const PLAN: Step = {
+  id: 'plan',
+  coach: 'rex',
+  plannedAt: 17 * 60 + 45,
+  points: 50,
+  title: 'Build your plan',
+  doneTitle: 'Plan built',
+  detail: '',
+  action: '',
+  tip: '',
+  name: 'Plan built',
+  result: '+50',
+  doneDetail: 'Built with the crew · +50 pts',
+  doneAt: 17 * 60 + 45,
+};
+
 /** Push Day A, as its big card shows it. */
 export function workoutOf(step: Step) {
+  if (step.first) {
+    return {
+      kind: 'Your first workout',
+      minutes: 25,
+      focus: 'Chest, shoulders and triceps',
+      progress: "We'll find your weights as you go",
+    };
+  }
   return {
+    kind: "Today's workout",
     minutes: step.lite ? 35 : 45,
     focus: 'Chest, shoulders and triceps',
     progress: step.lite ? 'Bench 30 lb · lighter to start' : 'Bench 35 lb · up from 30 lb',
@@ -145,6 +173,20 @@ export type Preview = {
 /** What's inside a step, for the sheet that previews it before you start. */
 export function previewOf(step: Step): Preview | undefined {
   const preview = PREVIEWS[step.id];
+  if (preview && step.first) {
+    // A first go: 25 minutes, two sets of each, and no weights until you find yours.
+    return {
+      ...preview,
+      kind: 'Workout · 25 min',
+      chips: ['25 min', '5 exercises', `+${step.points} pts`],
+      up: undefined,
+      items: preview.items.map(({ name, detail }) => ({
+        name,
+        detail: detail.replace(/^3 ×/, '2 ×').replace(/ · [\d.]+ lb$/, ' · find your weight'),
+      })),
+      need: `${preview.need} Start light. If a set feels easy, it goes up next time.`,
+    };
+  }
   if (!preview || !step.lite) return preview;
   // Lighter: 35 minutes, and the bench back at last time's weight.
   return {
@@ -190,17 +232,19 @@ const PREVIEWS: Partial<Record<StepId, Preview>> = {
 };
 
 const PROTEIN_GOAL = 150;
+/** A first day starts in the evening, so its goal is what dinner after training asks for. */
+export const FIRST_DAY_PROTEIN = 40;
 
 /**
  * Protein eaten today and the share of the goal, for the ring on Today. `elsewhere` is what
  * was eaten outside the steps, like lunch and snacks.
  */
-export function proteinToday(steps: Step[], elsewhere: number) {
+export function proteinToday(steps: Step[], elsewhere: number, goal = PROTEIN_GOAL) {
   const eaten = steps.reduce(
     (sum, step) => sum + (step.doneAt === undefined || step.skipped ? 0 : (step.protein ?? 0)),
     elsewhere,
   );
-  return { left: Math.max(0, PROTEIN_GOAL - eaten), share: Math.min(1, eaten / PROTEIN_GOAL) };
+  return { left: Math.max(0, goal - eaten), share: Math.min(1, eaten / goal) };
 }
 
 const WEEKDAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
@@ -218,6 +262,8 @@ export type Week = {
   fresh?: boolean;
   /** The plan is paused until then, and the streak is held. */
   pausedUntil?: Date;
+  /** A new member's first week, so there's no streak yet. */
+  first?: boolean;
 };
 
 export type WeekDay = {
@@ -250,16 +296,40 @@ export function thisWeek(now: Date, week: Week, workout?: Step) {
     return { days, held: true, title: 'Streak on hold', detail: `Paused until ${short}` };
   }
   const finished = done >= goal;
+  // Before a new member's first workout, the tile says when it is.
+  const first = days.findIndex((day) => day.state === 'planned');
+  const firstWhen =
+    first === today ? (now.getHours() >= 17 ? 'tonight' : 'today') : WEEKDAYS[(first + 1) % 7];
   return {
     days,
     held: false,
-    title: week.fresh
-      ? 'New streak · week 1'
-      : `${finished ? week.streak + 1 : week.streak}-week streak`,
+    title: week.first
+      ? 'Week 1'
+      : week.fresh
+        ? 'New streak · week 1'
+        : `${finished ? week.streak + 1 : week.streak}-week streak`,
     detail: finished
       ? `${done} of ${goal} workouts. Week done!`
-      : `${done} of ${goal} workouts this week`,
+      : week.first && done === 0 && first >= 0
+        ? `0 of ${goal} workouts · first one ${firstWhen}`
+        : `${done} of ${goal} workouts this week`,
   };
+}
+
+/** The next day after today with a workout, e.g. "Wednesday". */
+export function nextWorkoutDay(now: Date, week: Week) {
+  const today = (now.getDay() + 6) % 7;
+  const plan = week.plan ?? [0, 2, 4].map((day) => (today + day) % 7);
+  const ahead = [1, 2, 3, 4, 5, 6, 7].find((days) => plan.includes((today + days) % 7)) ?? 7;
+  return WEEKDAYS[(today + ahead + 1) % 7];
+}
+
+/** What tomorrow holds, for the line at the end of a first day. */
+export function tomorrowText(now: Date, week: Week) {
+  const today = (now.getDay() + 6) % 7;
+  const plan = week.plan ?? [0, 2, 4].map((day) => (today + day) % 7);
+  if (plan.includes((today + 1) % 7)) return 'Workout day';
+  return `Rest day · next workout ${nextWorkoutDay(now, week).slice(0, 3)}`;
 }
 
 export type Read = { coach: CoachName; kind: string; title: string };
@@ -311,14 +381,17 @@ export function forYou(steps: Step[], paused = false): Read[] {
   return [first, done('dinner') ? READS.breakfast : READS.dinner];
 }
 
-/** Once the workout is done, dinner is about recovery. */
+/** Once the workout is done, dinner is about recovery. With no workout today, it's just dinner. */
 export function stepText(step: Step, steps: Step[]) {
-  const trained = steps.some((s) => s.id === 'workout' && s.doneAt !== undefined);
-  if (step.id === 'dinner' && trained) {
+  const workout = steps.find((s) => s.id === 'workout');
+  if (step.id === 'dinner' && workout?.doneAt !== undefined) {
     return {
       detail: 'Aim for 40 g protein after training',
       tip: "Snap it and I'll count the protein.",
     };
+  }
+  if (step.id === 'dinner' && !workout) {
+    return { detail: 'Snap a photo to log it', tip: "Snap it and I'll count the protein." };
   }
   return { detail: step.detail, tip: step.tip };
 }

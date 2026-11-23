@@ -221,3 +221,45 @@ test('on a break, meals are optional until the plan is back on', async () => {
   expect(screen.getByText('Push Day A')).toBeOnTheScreen();
   expect(screen.getByText('4-week streak')).toBeOnTheScreen();
 });
+
+test('straight after onboarding, Today opens on a first day', async () => {
+  await render(<TodayScreen first />);
+
+  // Building the plan already earned the first points.
+  expect(screen.getByText('Newcomer')).toBeOnTheScreen();
+  expect(screen.getByText('50 / 500')).toBeOnTheScreen();
+  expect(screen.getByText('Plan built · +50')).toBeOnTheScreen();
+  expect(screen.getByText('Your first workout · 25 min')).toBeOnTheScreen();
+  expect(screen.getByText("We'll find your weights as you go")).toBeOnTheScreen();
+  expect(screen.getByText('40 g')).toBeOnTheScreen();
+  expect(screen.getByText('Week 1')).toBeOnTheScreen();
+  expect(screen.getByText('0 of 3 workouts · first one tonight')).toBeOnTheScreen();
+  expect(screen.getByText('Tomorrow')).toBeOnTheScreen();
+  expect(screen.getByText('Rest day · next workout Wed')).toBeOnTheScreen();
+  expect(screen.queryByText('For you')).not.toBeOnTheScreen();
+
+  await wait(700);
+  expect(
+    screen.getByText('Rex: Welcome to the crew, Arun! First up: a light workout tonight.'),
+  ).toBeOnTheScreen();
+});
+
+test('the plan built in onboarding has no undo', async () => {
+  await render(<TodayScreen first />);
+
+  await fireEvent.press(screen.getByText('Plan built · +50'));
+  await fireEvent.press(screen.getByText('Plan built'));
+  expect(screen.getByText('Built with the crew · +50 pts')).toBeOnTheScreen();
+  expect(screen.queryByText('Undo')).not.toBeOnTheScreen();
+});
+
+test('a first workout can move to the next workout day', async () => {
+  await render(<TodayScreen first />);
+
+  await fireEvent.press(screen.getByText('Not tonight? Move it to Wednesday'));
+  expect(screen.queryByText('Start workout')).not.toBeOnTheScreen();
+  expect(screen.getByText('0 of 3 workouts · first one Wednesday')).toBeOnTheScreen();
+  expect(screen.getByText('Rex: No problem. Your first workout is Wednesday.')).toBeOnTheScreen();
+  // With no training tonight, dinner is just dinner.
+  expect(screen.getByText('Snap a photo to log it')).toBeOnTheScreen();
+});
