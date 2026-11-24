@@ -41,7 +41,7 @@ export type Step = {
 };
 
 export const MOCK_NAME = 'Arun';
-export const MOCK_POINTS = 1380;
+export const MOCK_POINTS = 2080;
 
 export const MOCK_STEPS: Step[] = [
   {
@@ -493,27 +493,4 @@ export function greeting(now: Date, name: string) {
 /** "Monday, Sept 28", without relying on the device's locale. */
 export function formatDay(now: Date) {
   return `${WEEKDAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}`;
-}
-
-const LEVELS = [
-  { from: 0, name: 'Newcomer' },
-  { from: 500, name: 'First Steps' },
-  { from: 900, name: 'Learner' },
-  { from: 1200, name: 'Gym Rookie' },
-  { from: 1500, name: 'Gym Regular' },
-  { from: 2000, name: 'Steady Lifter' },
-  { from: 2600, name: 'Confident Lifter' },
-];
-
-export type Level = {
-  number: number;
-  name: string;
-  from: number;
-  /** Points for the next level; undefined at the top level. */
-  to?: number;
-};
-
-export function levelFor(points: number): Level {
-  const index = LEVELS.filter((level) => points >= level.from).length - 1;
-  return { number: index + 1, ...LEVELS[index], to: LEVELS[index + 1]?.from };
 }

@@ -5,7 +5,6 @@ import {
   formatDay,
   greeting,
   isQuiet,
-  levelFor,
   MOCK_STEPS,
   nextStep,
   nextWorkoutDay,
@@ -37,12 +36,6 @@ test('the greeting and date read like the mockup', () => {
   expect(greeting(at(17, 45), 'Arun')).toBe('Good evening, Arun');
   expect(formatDay(at(17, 45))).toBe('Monday, Sept 28');
   expect(formatDay(new Date(2026, 9, 3))).toBe('Saturday, Oct 3');
-});
-
-test('points fill levels', () => {
-  expect(levelFor(1380)).toEqual({ number: 4, name: 'Gym Rookie', from: 1200, to: 1500 });
-  expect(levelFor(1500)).toMatchObject({ number: 5, name: 'Gym Regular', to: 2000 });
-  expect(levelFor(3000)).toMatchObject({ number: 7, to: undefined });
 });
 
 const withDone = (...ids: StepId[]) =>

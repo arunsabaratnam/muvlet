@@ -14,8 +14,7 @@ import Animated, {
 
 import { coachColors, colors, fonts, levelColors } from '@/constants/theme';
 import { withCommas } from '@/features/onboarding/plan';
-
-import { levelFor } from './day';
+import { levelFor } from '@/features/progress/levels';
 
 const EASE = Easing.bezier(0.22, 1, 0.36, 1);
 
