@@ -122,3 +122,46 @@ export const tabColors = {
   active: 'rgba(63, 109, 243, 0.12)',
   formCheck: '#FF9254',
 } as const;
+
+/**
+ * Progress: each kind of workout keeps one colour in the 16-week grid and its key, `empty`
+ * is a day with nothing and `ahead` a day still to come this week.
+ */
+export const workoutColors = {
+  push: '#3F6DF3',
+  pull: '#F2711F',
+  legs: '#14A07F',
+  stretch: '#CDBDFB',
+  empty: '#EEF1F6',
+  ahead: '#F7F9FC',
+} as const;
+
+/** The key chip behind each workout's name: `wash` behind, `ink` for the text. */
+export const workoutChipColors = {
+  push: { wash: '#E3EAFF', ink: '#2C54C9' },
+  pull: { wash: '#FFE8D8', ink: '#A9460A' },
+  legs: { wash: '#DDF5EC', ink: '#0B6B56' },
+  stretch: { wash: '#F1ECFF', ink: '#5E42C7' },
+} as const;
+
+/**
+ * The barbell's plates by metal, heaviest first. Metals keep the plates clear of the colours
+ * already used for buttons, PRs and warnings.
+ */
+export const plateColors = {
+  iron: '#2F3747',
+  steel: '#74829B',
+  bronze: '#D08A4A',
+  gold: '#F0C24E',
+  /** Writing on a gold plate, where white wouldn't show. */
+  goldInk: '#5C4300',
+  bar: '#AEB5C3',
+  collar: '#667487',
+  end: '#9AA4B4',
+} as const;
+
+/** PRs: the green arrow and its chip. */
+export const prColors = {
+  ink: '#1F8F55',
+  wash: '#E3F5EC',
+} as const;
