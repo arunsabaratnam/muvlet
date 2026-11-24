@@ -36,7 +36,7 @@ test('shows the day, the greeting and the level', async () => {
   expect(screen.getByText('Monday, Sept 28')).toBeOnTheScreen();
   expect(screen.getByText('Good evening, Arun')).toBeOnTheScreen();
   expect(screen.getByText('Gym Rookie')).toBeOnTheScreen();
-  expect(screen.getByText('1,380 / 1,500')).toBeOnTheScreen();
+  expect(screen.getByText('2,080 / 2,200')).toBeOnTheScreen();
   expect(screen.queryByText('Push Day A takes you to Level 5')).not.toBeOnTheScreen();
 });
 
@@ -63,7 +63,7 @@ test('finishing the workout earns its points and folds it into the chip', async 
   await fireEvent.press(screen.getByText('Start workout'));
   expect(screen.getByText('Push Day A done')).toBeOnTheScreen();
   expect(screen.getByText('Gym Regular')).toBeOnTheScreen();
-  expect(screen.getByText('1,580 / 2,000')).toBeOnTheScreen();
+  expect(screen.getByText('2,280 / 3,600')).toBeOnTheScreen();
 
   await wait(1100);
   expect(screen.queryByText('Push Day A done')).not.toBeOnTheScreen();
@@ -97,7 +97,7 @@ test('a done step can be opened from its chip and undone', async () => {
 
   // It's past breakfast time, so it waits as a quiet line.
   expect(screen.getByText('Breakfast · log it later')).toBeOnTheScreen();
-  expect(screen.getByText('1,370 / 1,500')).toBeOnTheScreen();
+  expect(screen.getByText('2,070 / 2,200')).toBeOnTheScreen();
 
   await fireEvent.press(screen.getByText('Log it'));
   expect(screen.getByText('Breakfast logged')).toBeOnTheScreen();
@@ -162,7 +162,7 @@ test('late at night, the stretch can be let go', async () => {
   await wait(1100);
   expect(screen.getByText('Stretch · skipped')).toBeOnTheScreen();
   // No points lost, and none earned.
-  expect(screen.getByText('1,600 / 2,000')).toBeOnTheScreen();
+  expect(screen.getByText('2,300 / 3,600')).toBeOnTheScreen();
 });
 
 test("yesterday's missed workout can be done today", async () => {
@@ -227,7 +227,7 @@ test('straight after onboarding, Today opens on a first day', async () => {
 
   // Building the plan already earned the first points.
   expect(screen.getByText('Newcomer')).toBeOnTheScreen();
-  expect(screen.getByText('50 / 500')).toBeOnTheScreen();
+  expect(screen.getByText('50 / 250')).toBeOnTheScreen();
   expect(screen.getByText('Plan built · +50')).toBeOnTheScreen();
   expect(screen.getByText('Your first workout · 25 min')).toBeOnTheScreen();
   expect(screen.getByText("We'll find your weights as you go")).toBeOnTheScreen();

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { levelFor } from '@/features/progress/levels';
 import type { CoachName } from '@/features/welcome/coach';
 
 import {
   DONE_LINES,
-  levelFor,
   MOCK_STEPS,
   nextStep,
   stepText,
